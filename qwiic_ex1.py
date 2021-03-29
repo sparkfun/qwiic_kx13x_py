@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 #-----------------------------------------------------------------------------
-# qwiic_env_bme280_ex1.py
+# ex1.py
 #
 # Simple Example for the Qwiic BME280 Device
 #------------------------------------------------------------------------
 #
-# Written by  SparkFun Electronics, May 2019
+# Written by  SparkFun Electronics, April 2021
 # 
 # This python library supports the SparkFun Electroncis qwiic 
 # qwiic sensor/board ecosystem on a Raspberry Pi (and compatable) single
@@ -16,7 +16,7 @@
 # Do you like this library? Help support SparkFun. Buy a board!
 #
 #==================================================================================
-# Copyright (c) 2019 SparkFun Electronics
+# Copyright (c) 2021 SparkFun Electronics
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy 
 # of this software and associated documentation files (the "Software"), to deal 
@@ -40,34 +40,31 @@
 #
 
 from __future__ import print_function
-import qwiic_bme280
+import qwiic_kx13x
 import time
 import sys
 
 def runExample():
 
-	print("\nSparkFun BME280 Sensor  Example 1\n")
-	mySensor = qwiic_bme280.QwiicBme280()
+        print("\nSparkFun KX13X Accelerometer Example 1\n")
+        mySensor = qwiic_kx13x.QwiicKX132()
 
-	if mySensor.connected == False:
-		print("The Qwiic BME280 device isn't connected to the system. Please check your connection", \
-			file=sys.stderr)
-		return
+        if mySensor.connected == False:
+                print("The Qwiic KX13X Accelerometer device isn't connected to the system. Please check your connection", \
+                        file=sys.stderr)
+                return
 
-	mySensor.begin()
+        if mySensor.begin():
+            print("Confirmed can communicate.")
+        mySensor.initialize()
 
-	while True:
-		print("Humidity:\t%.3f" % mySensor.humidity)
-
-		print("Pressure:\t%.3f" % mySensor.pressure)	
-
-		print("Altitude:\t%.3f" % mySensor.altitude_feet)
-
-		print("Temperature:\t%.2f" % mySensor.temperature_fahrenheit)		
-
-		print("")
-		
-		time.sleep(1)
+        while True:
+                
+            mySensor.get_accel_data()
+            print("X: {0}g Y: {1}g Z: {2}g".format(mySensor.kx132_accel.x,
+                                                   mySensor.kx132_accel.y,
+                                                   mySensor.kx132_accel.z))
+            time.sleep(.2)
 
 
 if __name__ == '__main__':

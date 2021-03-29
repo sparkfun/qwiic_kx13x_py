@@ -82,7 +82,7 @@ _WHO_AM_I = [0x3D, 0x46]
 
 class QwiicKX13XCore(object):
     """
-    XwiicKX13XCore
+    QwiicKX13XCore
         :param address: The I2C address to use for the device.
                         If not provided, the default address is used.
         :param i2c_driver: An existing i2c driver object. If not provided
@@ -292,18 +292,18 @@ class QwiicKX13XCore(object):
         self.accel_control(False) 
 
         if settings == self.DEFAULT_SETTINGS:
-            self._i2c.writeByte(self.address, KX13X_CNTL1, DEFAULT_SETTINGS)
+            self._i2c.writeByte(self.address, self.KX13X_CNTL1, self.DEFAULT_SETTINGS)
         elif settings == self.INT_SETTINGS:
             self.set_interrupt_pin(true, 1)
             self.route_hardware_interrupt(self.HI_DATA_READY)
-            self._i2c.writeByte(self.address, KX13X_CNTL1, INT_SETTINGS)
+            self._i2c.writeByte(self.address, self.KX13X_CNTL1, self.INT_SETTINGS)
         elif settings == self.SOFT_INT_SETTINGS:
-            self._i2c.writeByte(self.address, KX13X_CNTL1, INT_SETTINGS)
+            self._i2c.writeByte(self.address, self.KX13X_CNTL1, self.INT_SETTINGS)
         elif settings == self.BUFFER_SETTINGS:
             self.set_interrupt_pin(true, 1)
             self.route_hardware_interrupt(self.HI_BUFFER_FULL)
             self.set_buffer_operation(self.BUFFER_MODE_FIFO, self.BUFFER_16BIT_SAMPLES)
-            self._i2c.writeByte(self.address, KX13X_CNTL1, INT_SETTINGS)
+            self._i2c.writeByte(self.address, self.KX13X_CNTL1, self.INT_SETTINGS)
         # Space fore more default settings
 
     def run_command_test(self):
@@ -453,7 +453,7 @@ class QwiicKX13XCore(object):
             self._i2c.writeByte(self.address, self.KX13X_INC4 , rdr)
             self.accel_control(accel_state)
             return True
-        else
+        else:
             self._i2c.writeByte(self.address, self.KX13X_INC6 , rdr)
             self.accel_control(accel_state)
             return True
@@ -477,7 +477,7 @@ class QwiicKX13XCore(object):
         reg_val = self._i2c.readByte(self.address, self.KX13X_INS2)
         if reg_val & 0x10:
             return True
-        else
+        else:
             return False
 
     def set_buffer_threshold(self, threshold):
@@ -542,20 +542,19 @@ class QwiicKX13XCore(object):
             :param:
             :return:
         """
-        accel_data = []
-
-        reg_val = self._i2c.readByte(self.address, KX13X_INC4)
-        if reg_val &= 0x40:
-            accel_data = readBlock(self.address, KX13X_XOUT_L,
-                                   TOTAL_ACCEL_DATA_16BIT)
-        else:
-            accel_data = readBlock(self.address, KX13X_XOUT_L,
-                                   TOTAL_ACCEL_DATA_8BIT)
         
-        xData = (accel_data[self.XMSB] << 8) | accel_data[self.XLSB]  
-        yData = (accel_data[self.YMSB] << 8) | accel_data[self.YLSB]  
-        zData = (accel_data[self.ZMSB] << 8) | accel_data[self.ZLSB]  
-
+        reg_val = self._i2c.readByte(self.address, self.KX13X_INC4)
+        if reg_val & 0x40:
+            accel_data = self._i2c.readBlock(self.address, self.KX13X_XOUT_L, self.TOTAL_ACCEL_DATA_16BIT)
+            xData = (accel_data[self.XMSB] << 8) | accel_data[self.XLSB]  
+            yData = (accel_data[self.YMSB] << 8) | accel_data[self.YLSB]  
+            zData = (accel_data[self.ZMSB] << 8) | accel_data[self.ZLSB]  
+        else:
+            accel_data = self._i2c.readBlock(self.address, self.KX13X_XOUT_L, self.TOTAL_ACCEL_DATA_8BIT)
+            xData = accel_data[0]  
+            yData = accel_data[1]  
+            zData = accel_data[2]  
+        
         self.raw_output_data.x = xData
         self.raw_output_data.y = yData
         self.raw_output_data.z = zData
@@ -573,8 +572,10 @@ class QwiicKX132(QwiicKX13XCore):
     CONV_8G =  .0002441407513657033
     CONV_16G = .0004882811975463118
 
+    kx132_accel = namedtuple('kx132_accel', 'x y z')
+
     def __init__(self, address = None, i2c_driver = None):
-        super().__init__(self, address=None, i2c_driver=None)
+        super().__init__(address, i2c_driver)
 
     def begin(self):
         """
@@ -604,26 +605,26 @@ class QwiicKX132(QwiicKX13XCore):
             :param:
             :return:
         """
-       accel_range = self._i2c.readByte(self.address, KX13X_CNTL1)
-       accel_range &= 0x18
-       accel_range = accel_range >> 3
+        accel_range = self._i2c.readByte(self.address, self.KX13X_CNTL1)
+        accel_range &= 0x18
+        accel_range = accel_range >> 3
 
-       if accel_range == self.KX132_RANGE2G:
-           self.kx134_accel.x = self.raw_output_data.x * self.CONV_2G
-           self.kx134_accel.y = self.raw_output_data.y * self.CONV_2G
-           self.kx134_accel.z = self.raw_output_data.z * self.CONV_2G
-       elif accel_range == self.KX132_RANGE4G:
-           self.kx134_accel.x = self.raw_output_data.x * self.CONV_4G
-           self.kx134_accel.y = self.raw_output_data.y * self.CONV_4G
-           self.kx134_accel.z = self.raw_output_data.z * self.CONV_4G
-       elif accel_range == self.KX132_RANGE8G:
-           self.kx134_accel.x = self.raw_output_data.x * self.CONV_8G
-           self.kx134_accel.y = self.raw_output_data.y * self.CONV_8G
-           self.kx134_accel.z = self.raw_output_data.z * self.CONV_8G
-       elif accel_range == self.KX132_RANGE16G:
-           self.kx134_accel.x = self.raw_output_data.x * self.CONV_16G
-           self.kx134_accel.y = self.raw_output_data.y * self.CONV_16G
-           self.kx134_accel.z = self.raw_output_data.z * self.CONV_16G
+        if accel_range == self.KX132_RANGE2G:
+            self.kx132_accel.x = self.raw_output_data.x * self.CONV_2G
+            self.kx132_accel.y = self.raw_output_data.y * self.CONV_2G
+            self.kx132_accel.z = self.raw_output_data.z * self.CONV_2G
+        elif accel_range == self.KX132_RANGE4G:
+            self.kx132_accel.x = self.raw_output_data.x * self.CONV_4G
+            self.kx132_accel.y = self.raw_output_data.y * self.CONV_4G
+            self.kx132_accel.z = self.raw_output_data.z * self.CONV_4G
+        elif accel_range == self.KX132_RANGE8G:
+            self.kx132_accel.x = self.raw_output_data.x * self.CONV_8G
+            self.kx132_accel.y = self.raw_output_data.y * self.CONV_8G
+            self.kx132_accel.z = self.raw_output_data.z * self.CONV_8G
+        elif accel_range == self.KX132_RANGE16G:
+            self.kx132_accel.x = self.raw_output_data.x * self.CONV_16G
+            self.kx132_accel.y = self.raw_output_data.y * self.CONV_16G
+            self.kx132_accel.z = self.raw_output_data.z * self.CONV_16G
 
 
 class QwiicKX134(QwiicKX13XCore):
@@ -642,7 +643,7 @@ class QwiicKX134(QwiicKX13XCore):
     kx134_accel = namedtuple('kx134_accel', 'x y z')
 
     def __init__(self, address = None, i2c_driver = None):
-        super().__init__(self, address=None, i2c_driver=None)
+        super().__init__(address, i2c_driver)
 
     def begin(self):
         """
@@ -672,24 +673,24 @@ class QwiicKX134(QwiicKX13XCore):
             :param:
             :return:
         """
-       accel_range = self._i2c.readByte(self.address, KX13X_CNTL1)
-       accel_range &= 0x18
-       accel_range = accel_range >> 3
+        accel_range = self._i2c.readByte(self.address, self.KX13X_CNTL1)
+        accel_range &= 0x18
+        accel_range = accel_range >> 3
 
-       if accel_range == self.KX134_RANGE8G:
-           self.kx134_accel.x = self.raw_output_data.x * self.CONV_8G
-           self.kx134_accel.y = self.raw_output_data.y * self.CONV_8G
-           self.kx134_accel.z = self.raw_output_data.z * self.CONV_8G
-       elif accel_range == self.KX134_RANGE16G:
-           self.kx134_accel.x = self.raw_output_data.x * self.CONV_16G
-           self.kx134_accel.y = self.raw_output_data.y * self.CONV_16G
-           self.kx134_accel.z = self.raw_output_data.z * self.CONV_16G
-       elif accel_range == self.KX134_RANGE32G:
-           self.kx134_accel.x = self.raw_output_data.x * self.CONV_32G
-           self.kx134_accel.y = self.raw_output_data.y * self.CONV_32G
-           self.kx134_accel.z = self.raw_output_data.z * self.CONV_32G
-       elif accel_range == self.KX134_RANGE64G:
-           self.kx134_accel.x = self.raw_output_data.x * self.CONV_64G
-           self.kx134_accel.y = self.raw_output_data.y * self.CONV_64G
-           self.kx134_accel.z = self.raw_output_data.z * self.CONV_64G
+        if accel_range == self.KX134_RANGE8G:
+            self.kx134_accel.x = self.raw_output_data.x * self.CONV_8G
+            self.kx134_accel.y = self.raw_output_data.y * self.CONV_8G
+            self.kx134_accel.z = self.raw_output_data.z * self.CONV_8G
+        elif accel_range == self.KX134_RANGE16G:
+            self.kx134_accel.x = self.raw_output_data.x * self.CONV_16G
+            self.kx134_accel.y = self.raw_output_data.y * self.CONV_16G
+            self.kx134_accel.z = self.raw_output_data.z * self.CONV_16G
+        elif accel_range == self.KX134_RANGE32G:
+            self.kx134_accel.x = self.raw_output_data.x * self.CONV_32G
+            self.kx134_accel.y = self.raw_output_data.y * self.CONV_32G
+            self.kx134_accel.z = self.raw_output_data.z * self.CONV_32G
+        elif accel_range == self.KX134_RANGE64G:
+            self.kx134_accel.x = self.raw_output_data.x * self.CONV_64G
+            self.kx134_accel.y = self.raw_output_data.y * self.CONV_64G
+            self.kx134_accel.z = self.raw_output_data.z * self.CONV_64G
 
