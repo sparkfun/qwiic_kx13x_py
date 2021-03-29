@@ -294,13 +294,13 @@ class QwiicKX13XCore(object):
         if settings == self.DEFAULT_SETTINGS:
             self._i2c.writeByte(self.address, self.KX13X_CNTL1, self.DEFAULT_SETTINGS)
         elif settings == self.INT_SETTINGS:
-            self.set_interrupt_pin(true, 1)
+            self.set_interrupt_pin(True, 1)
             self.route_hardware_interrupt(self.HI_DATA_READY)
             self._i2c.writeByte(self.address, self.KX13X_CNTL1, self.INT_SETTINGS)
         elif settings == self.SOFT_INT_SETTINGS:
             self._i2c.writeByte(self.address, self.KX13X_CNTL1, self.INT_SETTINGS)
         elif settings == self.BUFFER_SETTINGS:
-            self.set_interrupt_pin(true, 1)
+            self.set_interrupt_pin(True, 1)
             self.route_hardware_interrupt(self.HI_BUFFER_FULL)
             self.set_buffer_operation(self.BUFFER_MODE_FIFO, self.BUFFER_16BIT_SAMPLES)
             self._i2c.writeByte(self.address, self.KX13X_CNTL1, self.INT_SETTINGS)
@@ -382,7 +382,7 @@ class QwiicKX13XCore(object):
             return False
 
         accel_state = self.get_accel_state()
-        self.accel_control(false)
+        self.accel_control(False)
 
         reg_val = self._i2c.readByte(self.address, self.KX13X_ODCNTL)
         reg_val &= 0x40
@@ -423,7 +423,7 @@ class QwiicKX13XCore(object):
             return False
 
         accel_state = self.get_accel_state()
-        self.accel_control(false)
+        self.accel_control(False)
 
         combined_arguments = (pulse_width << 6) | (enable << 5) | (polarity << 4) | (latch_control << 3)
                                                                    
@@ -434,7 +434,7 @@ class QwiicKX13XCore(object):
 
 
 
-    def route_hardware_interrupt(self, rdr, pin):
+    def route_hardware_interrupt(self, rdr, pin = 1):
         """
             Does something
             :param:
@@ -447,7 +447,7 @@ class QwiicKX13XCore(object):
             return False
 
         accel_state = self.get_accel_state()
-        self.accel_control(false)
+        self.accel_control(False)
 
         if pin == 1:
             self._i2c.writeByte(self.address, self.KX13X_INC4 , rdr)

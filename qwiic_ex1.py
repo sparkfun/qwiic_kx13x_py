@@ -56,7 +56,7 @@ def runExample():
 
         if mySensor.begin():
             print("Confirmed can communicate.")
-        mySensor.initialize()
+        mySensor.initialize(mySensor.BUFFER_SETTINGS)
 
         while True:
                 
