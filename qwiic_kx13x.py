@@ -47,7 +47,7 @@
 """
 qwiic_kx13x
 ============
-Python module for the qwiic bme280 sensor, which is part of the [SparkFun Qwiic Environmental Combo Breakout](https://www.sparkfun.com/products/14348)
+Python module for the qwiic kx132/4 accelerometers.
 This python package is a port of the existing [SparkFun KX13X Arduino Library](https://github.com/sparkfun/SparkFun_KX13X_Arduino_Library)
 This package can be used in conjunction with the overall [SparkFun qwiic Python Package](https://github.com/sparkfun/Qwiic_Py)
 New to qwiic? Take a look at the entire [SparkFun qwiic ecosystem](https://www.sparkfun.com/qwiic).
@@ -55,8 +55,8 @@ New to qwiic? Take a look at the entire [SparkFun qwiic ecosystem](https://www.s
 
 #-----------------------------------------------------------------------------
 from __future__ import print_function
-import math
 import qwiic_i2c
+from collections import namedtuple
 
 # Define the device name and I2C addresses. These are set in the class defintion
 # as class variables, making them avilable without having to create a class instance.
@@ -82,7 +82,7 @@ _WHO_AM_I = [0x3D, 0x46]
 
 class QwiicKX13XCore(object):
     """
-    QwiicKX13XCore
+    XwiicKX13XCore
         :param address: The I2C address to use for the device.
                         If not provided, the default address is used.
         :param i2c_driver: An existing i2c driver object. If not provided
@@ -91,7 +91,7 @@ class QwiicKX13XCore(object):
         :rtype: Object
     """
     # Constructor
-    device_name         =_DEFAULT_NAME
+    device_name         = _DEFAULT_NAME
     available_addresses = _AVAILABLE_I2C_ADDRESS
 
     TOTAL_ACCEL_DATA_16BIT = 6
@@ -232,9 +232,7 @@ class QwiicKX13XCore(object):
     HI_BUFFER_FULL    = 0x40
     HI_FREEFALL       = 0x80
 
-    output_data = {xData:0, yData:0, zData:0}
-
-    raw_output_data = {xData:0, ydata:0, zData:0}
+    raw_output_data = namedtuple('raw_output_data', 'x y z')
 
     # Constructor
     def __init__(self, address=None, i2c_driver=None):
@@ -281,32 +279,67 @@ class QwiicKX13XCore(object):
         chipID = self._i2c.readByte(self.address, self.KX13X_WHO_AM_I)
         if chipID not in _WHO_AM_I:
             print("Invalid Chip ID: 0x" % chipID)
-            return False
 
-        return True
+        return chipID
 
     def initialize(self, settings = DEFAULT_SETTINGS):
         """
             Does something
             :param:
-                :return:
+            :return:
 
         """
+        self.accel_control(False) 
+
+        if settings == self.DEFAULT_SETTINGS:
+            self._i2c.writeByte(self.address, KX13X_CNTL1, DEFAULT_SETTINGS)
+        elif settings == self.INT_SETTINGS:
+            self.set_interrupt_pin(true, 1)
+            self.route_hardware_interrupt(self.HI_DATA_READY)
+            self._i2c.writeByte(self.address, KX13X_CNTL1, INT_SETTINGS)
+        elif settings == self.SOFT_INT_SETTINGS:
+            self._i2c.writeByte(self.address, KX13X_CNTL1, INT_SETTINGS)
+        elif settings == self.BUFFER_SETTINGS:
+            self.set_interrupt_pin(true, 1)
+            self.route_hardware_interrupt(self.HI_BUFFER_FULL)
+            self.set_buffer_operation(self.BUFFER_MODE_FIFO, self.BUFFER_16BIT_SAMPLES)
+            self._i2c.writeByte(self.address, KX13X_CNTL1, INT_SETTINGS)
+        # Space fore more default settings
 
     def run_command_test(self):
         """
             Does something
             :param:
-                :return:
+            :return:
 
         """
+        reg_val = self._i2c.readByte(self.address, self.KX13X_CNTL2)
+        reg_val &= 0xBF
+        reg_val |= (1 << 6) 
+        self._i2c.writeByte(self.address, self.KX13X_CNTL2 , reg_val)
+
+        reg_val = self._i2c.readByte(self.address, self.KX13X_COTR)
+        if reg_val == COTR_POS_STATE:
+            return True
+        else:
+            return False
+    
+        
     def accel_control(self, enable):
         """
             Does something
             :param:
-                :return:
+            :return:
 
         """
+        if enable != True and enable != False:
+            return False
+
+        reg_val = self._i2c.readByte(self.address, self.KX13X_CNTL1)
+        reg_val &= 0x7F
+        reg_val |= (enable << 7)
+        self._i2c.writeByte(self.address, self.KX13X_CNTL1 , reg_val)
+
         # Make the mode a property of this object
         #mode = property(get_mode, set_mode)
     
@@ -314,78 +347,176 @@ class QwiicKX13XCore(object):
         """
             Does something
             :param:
-                :return:
+            :return:
 
         """
+        reg_val = self._i2c.readByte(self.address, self.KX13X_CNTL1)
+        return (reg_val & 0x80) >> 7
     #temperature_celsius = property(get_temperature_celsius)
 
-    def set_range(self):
+    def set_range(self, kx13x_range):
         """
             Does something
             :param:
-                :return:
+            :return:
 
         """
 
-    def set_output_data_rate(self, odr):
+        if kx13x_range < 0 or kx13x_range > 3:
+            return False
+
+        reg_val = self._i2c.readByte(self.address, self.KX13X_CNTL1)
+        reg_val &= 0xE7
+        reg_val |= (kx13x_range << 3)
+        self._i2c.writeByte(self.address, self.KX13X_CNTL1 , reg_val)
+
+
+    def set_output_data_rate(self, rate):
         """
             Does something
             :param:
-                :return:
+            :return:
 
         """
+        if rate < 0 or rate > 15:
+            return False
+
+        accel_state = self.get_accel_state()
+        self.accel_control(false)
+
+        reg_val = self._i2c.readByte(self.address, self.KX13X_ODCNTL)
+        reg_val &= 0x40
+        reg_val |= rate
+        self._i2c.writeByte(self.address, self.KX13X_ODCNTL , reg_val)
+        self.accelControl(accel_state)
+
     
-    def read_output_data_rate(self)
+    def get_output_data_rate(self):
         """
             Does something
             :param:
-                :return:
+            :return:
 
         """
+
+        reg_val = self._i2c.readByte(self.address, self.KX13X_ODCNTL)
+        reg_val &= 0x40
+        return (0.78 * (2 * reg_val))
     
+    output_data_rate = property(get_output_data_rate, set_output_data_rate)
+     
     def set_interrupt_pin(self, enable, polarity = 0, pulse_width = 0, 
                           latch_control = False):
         """
             Does something
             :param:
-                :return:
+            :return:
 
         """
+        if enable != True and enable != False:
+            return False
+        if polarity != 1 and polarity != 0:
+            return False
+        if pulse_width != 1 and pulse_width != 0:
+            return False
+        if latch_control < 0 or latch_control > 4:
+            return False
+
+        accel_state = self.get_accel_state()
+        self.accel_control(false)
+
+        combined_arguments = (pulse_width << 6) | (enable << 5) | (polarity << 4) | (latch_control << 3)
+                                                                   
+        reg_val = self._i2c.readByte(self.address, self.KX13X_INC1)
+        reg_val &= 0x07
+        reg_val |= combined_arguments
+        self._i2c.writeByte(self.address, self.KX13X_INC1 , reg_val)
+
+
+
     def route_hardware_interrupt(self, rdr, pin):
         """
             Does something
             :param:
-                :return:
+            :return:
 
         """
+        if rdr < 0 or rdr > 128:
+            return False
+        if pin != 1 and pin != 2:
+            return False
+
+        accel_state = self.get_accel_state()
+        self.accel_control(false)
+
+        if pin == 1:
+            self._i2c.writeByte(self.address, self.KX13X_INC4 , rdr)
+            self.accel_control(accel_state)
+            return True
+        else
+            self._i2c.writeByte(self.address, self.KX13X_INC6 , rdr)
+            self.accel_control(accel_state)
+            return True
+
     def clear_interrupt(self):
         """
             Does something
             :param:
-                :return:
+            :return:
 
         """
+        self._i2c.readByte(self.address, self.KX13X_INT_REL)
+
     def data_trigger(self):
         """
             Does something
             :param:
-                :return:
+            :return:
 
         """
+        reg_val = self._i2c.readByte(self.address, self.KX13X_INS2)
+        if reg_val & 0x10:
+            return True
+        else
+            return False
+
     def set_buffer_threshold(self, threshold):
         """
             Does something
             :param:
-                :return:
+            :return:
 
         """
+        if threshold < 2 or threshold > 171:
+            return False
+
+        resolution = self._i2c.readByte(self.address, self.KX13X_BUF_CNTL2)
+        resolution &= 0x40
+        resolution = resolution >> 6
+
+        if threshold > 86 and resolution == 1: # At 16bit resolution - max samples: 86
+            threshold == 86
+
+        self._i2c.writeByte(self.address, self.KX13X_BUF_CNTL1, threshold)
+
     def set_buffer_operation(self, operation_mode, resolution):
         """
             Does something
             :param:
-                :return:
-
+            :return:
         """
+        if resolution < 0 or resolution > 1:
+            return False
+        if operation_mode < 0 or operation_mode > 2:
+            return False
+
+        combined_arguments = (resolution << 6) | operation_mode
+
+        reg_val = self._i2c.readByte(self.address, self.KX13X_BUF_CNTL2)
+        reg_val &= 0xBC
+        reg_val |= combined_arguments
+        self._i2c.writeByte(self.address, self.KX13X_BUF_CNTL2 , reg_val)
+
     def enable_buffer(self, enable, enable_interrupt):
         """
             Does something
@@ -393,41 +524,125 @@ class QwiicKX13XCore(object):
             :return:
 
         """
-    def get_raw_accel_data(self, raw_output_data):
+        if enable != True and enable != False:
+            return False
+        if enable_interrupt != True and enable_interrupt != False:
+            return False
+
+        combined_arguments = (enable << 7) | (enable_interrupt << 5)
+
+        reg_val = self._i2c.readByte(self.address, self.KX13X_BUF_CNTL2)
+        reg_val &= 0x5F
+        reg_val |= combined_arguments
+        self._i2c.writeByte(self.address, self.KX13X_BUF_CNTL2 , reg_val)
+
+    def get_raw_accel_data(self):
         """
             Does something
             :param:
             :return:
-
         """
+        accel_data = []
 
-class QwiicKX132(object):
-    def __init__(self):
+        reg_val = self._i2c.readByte(self.address, KX13X_INC4)
+        if reg_val &= 0x40:
+            accel_data = readBlock(self.address, KX13X_XOUT_L,
+                                   TOTAL_ACCEL_DATA_16BIT)
+        else:
+            accel_data = readBlock(self.address, KX13X_XOUT_L,
+                                   TOTAL_ACCEL_DATA_8BIT)
+        
+        xData = (accel_data[self.XMSB] << 8) | accel_data[self.XLSB]  
+        yData = (accel_data[self.YMSB] << 8) | accel_data[self.YLSB]  
+        zData = (accel_data[self.ZMSB] << 8) | accel_data[self.ZLSB]  
+
+        self.raw_output_data.x = xData
+        self.raw_output_data.y = yData
+        self.raw_output_data.z = zData
+
+
+class QwiicKX132(QwiicKX13XCore):
+
+    KX132_WHO_AM_I = 0x3D
+    KX132_RANGE2G  = 0x00
+    KX132_RANGE4G  = 0x01
+    KX132_RANGE8G  = 0x02
+    KX132_RANGE16G = 0x03
+    CONV_2G =  .00006103518784142582
+    CONV_4G =  .0001220703756828516
+    CONV_8G =  .0002441407513657033
+    CONV_16G = .0004882811975463118
+
+    def __init__(self, address = None, i2c_driver = None):
+        super().__init__(self, address=None, i2c_driver=None)
+
     def begin(self):
         """
             Does something
             :param:
             :return:
 
-            """
+        """
+        chipID = self.beginCore()
+        if chipID == self.KX132_WHO_AM_I:
+            return True
+        else:
+            return False
+
     def get_accel_data(self):
         """
             Does something
             :param:
             :return:
+        """
+        self.get_raw_accel_data()
+        self.conv_accel_data()
 
-            """
     def conv_accel_data(self):
         """
             Does something
             :param:
             :return:
+        """
+       accel_range = self._i2c.readByte(self.address, KX13X_CNTL1)
+       accel_range &= 0x18
+       accel_range = accel_range >> 3
 
-            """
+       if accel_range == self.KX132_RANGE2G:
+           self.kx134_accel.x = self.raw_output_data.x * self.CONV_2G
+           self.kx134_accel.y = self.raw_output_data.y * self.CONV_2G
+           self.kx134_accel.z = self.raw_output_data.z * self.CONV_2G
+       elif accel_range == self.KX132_RANGE4G:
+           self.kx134_accel.x = self.raw_output_data.x * self.CONV_4G
+           self.kx134_accel.y = self.raw_output_data.y * self.CONV_4G
+           self.kx134_accel.z = self.raw_output_data.z * self.CONV_4G
+       elif accel_range == self.KX132_RANGE8G:
+           self.kx134_accel.x = self.raw_output_data.x * self.CONV_8G
+           self.kx134_accel.y = self.raw_output_data.y * self.CONV_8G
+           self.kx134_accel.z = self.raw_output_data.z * self.CONV_8G
+       elif accel_range == self.KX132_RANGE16G:
+           self.kx134_accel.x = self.raw_output_data.x * self.CONV_16G
+           self.kx134_accel.y = self.raw_output_data.y * self.CONV_16G
+           self.kx134_accel.z = self.raw_output_data.z * self.CONV_16G
 
-class QwiicKX134(object):
 
-    def __init__(self):
+class QwiicKX134(QwiicKX13XCore):
+
+    KX134_WHO_AM_I = 0x46
+    KX134_RANGE8G  = 0x00
+    KX134_RANGE16G = 0x01
+    KX134_RANGE32G = 0x02
+    KX134_RANGE64G = 0x03
+
+    CONV_8G =  .000244140751365703299
+    CONV_16G = .000488281197546311838
+    CONV_32G = .000976523950926236762
+    CONV_64G = .001953125095370342112
+
+    kx134_accel = namedtuple('kx134_accel', 'x y z')
+
+    def __init__(self, address = None, i2c_driver = None):
+        super().__init__(self, address=None, i2c_driver=None)
 
     def begin(self):
         """
@@ -435,19 +650,46 @@ class QwiicKX134(object):
             :param:
             :return:
 
-            """
+        """
+        chipID = self.beginCore()
+        if chipID == self.KX134_WHO_AM_I:
+            return True
+        else:
+            return False
+
     def get_accel_data(self):
         """
             Does something
             :param:
             :return:
+        """
+        self.get_raw_accel_data()
+        self.conv_accel_data()
 
-            """
     def conv_accel_data(self):
         """
             Does something
             :param:
             :return:
+        """
+       accel_range = self._i2c.readByte(self.address, KX13X_CNTL1)
+       accel_range &= 0x18
+       accel_range = accel_range >> 3
 
-            """
+       if accel_range == self.KX134_RANGE8G:
+           self.kx134_accel.x = self.raw_output_data.x * self.CONV_8G
+           self.kx134_accel.y = self.raw_output_data.y * self.CONV_8G
+           self.kx134_accel.z = self.raw_output_data.z * self.CONV_8G
+       elif accel_range == self.KX134_RANGE16G:
+           self.kx134_accel.x = self.raw_output_data.x * self.CONV_16G
+           self.kx134_accel.y = self.raw_output_data.y * self.CONV_16G
+           self.kx134_accel.z = self.raw_output_data.z * self.CONV_16G
+       elif accel_range == self.KX134_RANGE32G:
+           self.kx134_accel.x = self.raw_output_data.x * self.CONV_32G
+           self.kx134_accel.y = self.raw_output_data.y * self.CONV_32G
+           self.kx134_accel.z = self.raw_output_data.z * self.CONV_32G
+       elif accel_range == self.KX134_RANGE64G:
+           self.kx134_accel.x = self.raw_output_data.x * self.CONV_64G
+           self.kx134_accel.y = self.raw_output_data.y * self.CONV_64G
+           self.kx134_accel.z = self.raw_output_data.z * self.CONV_64G
 
