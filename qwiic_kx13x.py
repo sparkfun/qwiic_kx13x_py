@@ -285,11 +285,11 @@ class QwiicKX13XCore(object):
             and buffer.
             :param settings: A class constant indicating which setting to
                 configure: DEFAULT_SETTINGS, INT_SETTINGS, SOFT_INT_SETTINGS,
-                BUFFER_SETTINGS. 
-            :return: No return value. 
+                BUFFER_SETTINGS.
+            :return: No return value.
 
         """
-        self.accel_control(False) 
+        self.accel_control(False)
 
         if settings == self.DEFAULT_SETTINGS:
             self._i2c.writeByte(self.address, self.KX13X_CNTL1, self.DEFAULT_SETTINGS)
@@ -308,13 +308,13 @@ class QwiicKX13XCore(object):
 
     def run_command_test(self):
         """
-            This function runs the self test built into the accelerometer. 
+            This function runs the self test built into the accelerometer.
             :return: Returns true upon successful test, and false otherwise.
             :rtype: bool
         """
         reg_val = self._i2c.readByte(self.address, self.KX13X_CNTL2)
         reg_val &= 0xBF
-        reg_val |= (1 << 6) 
+        reg_val |= (1 << 6)
         self._i2c.writeByte(self.address, self.KX13X_CNTL2 , reg_val)
 
         reg_val = self._i2c.readByte(self.address, self.KX13X_COTR)
@@ -322,8 +322,8 @@ class QwiicKX13XCore(object):
             return True
         else:
             return False
-    
-        
+
+
     def accel_control(self, enable):
         """
             This functions controls the accelerometers power on and off state.
@@ -355,14 +355,14 @@ class QwiicKX13XCore(object):
             Sets the range reported by the accelerometer. For the KX132, the
             range is from 2G - 16G and for the KX134 it's 8G - 32G.
             :param kx13x_range: Eight constants (four per version) represent values from zero to
-            four indicating the range to be set: 
-                KX132_RANGE2G, 
+            four indicating the range to be set:
+                KX132_RANGE2G,
                 KX132_RANGE4G,
-                KX132_RANGE8G, 
-                KX132_RANGE16G 
-                KX134_RANGE8G, 
-                KX134_RANGE16G, 
-                KX134_RANGE32G, 
+                KX132_RANGE8G,
+                KX132_RANGE16G
+                KX134_RANGE8G,
+                KX134_RANGE16G,
+                KX134_RANGE32G,
                 KX134_RANGE64G.
             :return: Returns false if an incorrect argument is given.
             :rtype: bool
@@ -380,7 +380,7 @@ class QwiicKX13XCore(object):
 
     def set_output_data_rate(self, rate):
         """
-            Sets the rate at which the accelerometer outputs data. 
+            Sets the rate at which the accelerometer outputs data.
             :param rate: A value from zero to fifteen indicating which rate to
             set.
             :return: Returns false if an an incorrect argument is given.
@@ -399,7 +399,7 @@ class QwiicKX13XCore(object):
         self._i2c.writeByte(self.address, self.KX13X_ODCNTL , reg_val)
         self.accelControl(accel_state)
 
-    
+
     def get_output_data_rate(self):
         """
             Gets the accelerometers output data rate.
@@ -411,15 +411,15 @@ class QwiicKX13XCore(object):
         reg_val = self._i2c.readByte(self.address, self.KX13X_ODCNTL)
         reg_val &= 0x40
         return (0.78 * (2 * reg_val))
-    
+
     output_data_rate = property(get_output_data_rate, set_output_data_rate)
-     
-    def set_interrupt_pin(self, enable, polarity = 0, pulse_width = 0, 
+
+    def set_interrupt_pin(self, enable, polarity = 0, pulse_width = 0,
                           latch_control = False):
         """
             Sets all of whether the data ready bit is reported to the hardware
             interrupt pin, the polarity of the signal (HIGH or LOW), the width
-            of the pulse, and how the interrupt is cleared. 
+            of the pulse, and how the interrupt is cleared.
             :param enable: Sets hardware interrupt to "on" or "off".
             :param polarity: Sets the active state of the hardware pin - HIGH
             or LOW.
@@ -442,7 +442,7 @@ class QwiicKX13XCore(object):
         self.accel_control(False)
 
         combined_arguments = (pulse_width << 6) | (enable << 5) | (polarity << 4) | (latch_control << 3)
-                                                                   
+
         reg_val = self._i2c.readByte(self.address, self.KX13X_INC1)
         reg_val &= 0x07
         reg_val |= combined_arguments
@@ -454,10 +454,10 @@ class QwiicKX13XCore(object):
         """
             Determines which interrupt is reported: freefall, buffer full,
             watermark, data ready, back to sleep, tap/double tap, wakeup or
-            tilt. Also which hardware pin its reported on: one or two.  
+            tilt. Also which hardware pin its reported on: one or two.
             :param rdr: The interrupt to be reported.
             :param pin: The hardware pin on which the interrupt is reported.
-            :return: Returns true after configuring the register and false if an an 
+            :return: Returns true after configuring the register and false if an an
             incorrect argument is given.
             :rtype: bool
 
@@ -481,7 +481,7 @@ class QwiicKX13XCore(object):
 
     def clear_interrupt(self):
         """
-            Clears the interrupt. 
+            Clears the interrupt.
             :return: No return value.
 
         """
@@ -489,7 +489,7 @@ class QwiicKX13XCore(object):
 
     def data_trigger(self):
         """
-            Reads the register indicating whether data is ready to be read. 
+            Reads the register indicating whether data is ready to be read.
             :return: Returns true if data is ready to be read and false
             otherwise.
             :rtype: bool
@@ -505,7 +505,7 @@ class QwiicKX13XCore(object):
         """
             Sets how many samples are stored in the buffer.
             :param threshold: The number of samples to be stored.
-            :return: Returns false if an incorrect argument is given. 
+            :return: Returns false if an incorrect argument is given.
             :rtype: bool
         """
         if threshold < 2 or threshold > 171:
@@ -522,11 +522,11 @@ class QwiicKX13XCore(object):
 
     def set_buffer_operation(self, operation_mode, resolution):
         """
-            Sets the mode and resolution of the samples stored in the buffer. 
+            Sets the mode and resolution of the samples stored in the buffer.
             :param operation_mode: Sets the mode:
-                                   BUFFER_MODE_FIFO 
-                                   BUFFER_MODE_STREAM 
-                                   BUFFER_MODE_TRIGGER 
+                                   BUFFER_MODE_FIFO
+                                   BUFFER_MODE_STREAM
+                                   BUFFER_MODE_TRIGGER
             :param resolution: Sets the resolution of the samples, 8 or 16 bit.
             :return: Returns false if an incorrect argument is given.
             :rtype: bool
@@ -546,7 +546,7 @@ class QwiicKX13XCore(object):
     def enable_buffer(self, enable, enable_interrupt):
         """
             Enables the buffer and whether the buffer triggers an interrupt
-            when full. 
+            when full.
             :param enable: Enables the buffer.
             :param enable: Enables the buffer's interrupt.
             :return: Returns false if an incorrect argument is given.
@@ -569,19 +569,19 @@ class QwiicKX13XCore(object):
             Checks which registers are storing acceleration data and retrieves
             it, storing it in a named tuple local to the class.
         """
-        
+
         reg_val = self._i2c.readByte(self.address, self.KX13X_INC4)
         if reg_val & 0x40:
             accel_data = self._i2c.readBlock(self.address, self.KX13X_XOUT_L, self.TOTAL_ACCEL_DATA_16BIT)
-            xData = (accel_data[self.XMSB] << 8) | accel_data[self.XLSB]  
-            yData = (accel_data[self.YMSB] << 8) | accel_data[self.YLSB]  
-            zData = (accel_data[self.ZMSB] << 8) | accel_data[self.ZLSB]  
+            xData = (accel_data[self.XMSB] << 8) | accel_data[self.XLSB]
+            yData = (accel_data[self.YMSB] << 8) | accel_data[self.YLSB]
+            zData = (accel_data[self.ZMSB] << 8) | accel_data[self.ZLSB]
         else:
             accel_data = self._i2c.readBlock(self.address, self.KX13X_XOUT_L, self.TOTAL_ACCEL_DATA_8BIT)
-            xData = accel_data[0]  
-            yData = accel_data[1]  
-            zData = accel_data[2]  
-        
+            xData = accel_data[0]
+            yData = accel_data[1]
+            zData = accel_data[2]
+
         self.raw_output_data.x = xData
         self.raw_output_data.y = yData
         self.raw_output_data.z = zData
@@ -625,11 +625,10 @@ class QwiicKX132(QwiicKX13XCore):
         """
         self.get_raw_accel_data()
         self.conv_accel_data()
-
-    def conv_accel_data(self):
+def conv_accel_data(self):
         """
             Converts raw acceleration data according to the range setting and
-            stores it in a named tuple local to the QwiicKX132. 
+            stores it in a named tuple local to the QwiicKX132.
         """
         accel_range = self._i2c.readByte(self.address, self.KX13X_CNTL1)
         accel_range &= 0x18
@@ -696,26 +695,26 @@ class QwiicKX134(QwiicKX13XCore):
     def conv_accel_data(self):
         """
             Converts raw acceleration data according to the range setting and
-            stores it in a named tuple local to the QwiicKX132. 
+            stores it in a named tuple local to the QwiicKX132.
         """
         accel_range = self._i2c.readByte(self.address, self.KX13X_CNTL1)
         accel_range &= 0x18
         accel_range = accel_range >> 3
 
         if accel_range == self.KX134_RANGE8G:
-            self.kx134_accel.x = round(self.raw_output_data.x * self.CONV_8G)
-            self.kx134_accel.y = round(self.raw_output_data.y * self.CONV_8G)
-            self.kx134_accel.z = round(self.raw_output_data.z * self.CONV_8G)
+            self.kx134_accel.x = round(self.raw_output_data.x * self.CONV_8G, 6)
+            self.kx134_accel.y = round(self.raw_output_data.y * self.CONV_8G, 6)
+            self.kx134_accel.z = round(self.raw_output_data.z * self.CONV_8G, 6)
         elif accel_range == self.KX134_RANGE16G:
-            self.kx134_accel.x = round(self.raw_output_data.x * self.CONV_16G)
-            self.kx134_accel.y = round(self.raw_output_data.y * self.CONV_16G)
-            self.kx134_accel.z = round(self.raw_output_data.z * self.CONV_16G)
+            self.kx134_accel.x = round(self.raw_output_data.x * self.CONV_16G, 6)
+            self.kx134_accel.y = round(self.raw_output_data.y * self.CONV_16G, 6)
+            self.kx134_accel.z = round(self.raw_output_data.z * self.CONV_16G, 6)
         elif accel_range == self.KX134_RANGE32G:
-            self.kx134_accel.x = round(self.raw_output_data.x * self.CONV_32G)
-            self.kx134_accel.y = round(self.raw_output_data.y * self.CONV_32G)
-            self.kx134_accel.z = round(self.raw_output_data.z * self.CONV_32G)
+            self.kx134_accel.x = round(self.raw_output_data.x * self.CONV_32G, 6)
+            self.kx134_accel.y = round(self.raw_output_data.y * self.CONV_32G, 6)
+            self.kx134_accel.z = round(self.raw_output_data.z * self.CONV_32G, 6)
         elif accel_range == self.KX134_RANGE64G:
-            self.kx134_accel.x = round(self.raw_output_data.x * self.CONV_64G)
-            self.kx134_accel.y = round(self.raw_output_data.y * self.CONV_64G)
-            self.kx134_accel.z = round(self.raw_output_data.z * self.CONV_64G)
+            self.kx134_accel.x = round(self.raw_output_data.x * self.CONV_64G, 6)
+            self.kx134_accel.y = round(self.raw_output_data.y * self.CONV_64G, 6)
+            self.kx134_accel.z = round(self.raw_output_data.z * self.CONV_64G, 6)
 
