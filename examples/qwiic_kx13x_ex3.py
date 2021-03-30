@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 #-----------------------------------------------------------------------------
-# qwiic_kx13x_ex2.py
+# qwiic_kx13x_ex3.py
 #
-# Simple example for the Qwiic KX132/4 Accelerometer using hardware interrupts
+# Simple example for the Qwiic KX132/4 Accelerometer using software interrupts
 # to indicate that data is ready.
 #------------------------------------------------------------------------
 #
@@ -37,13 +37,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 # SOFTWARE.
 #==================================================================================
-# Example 2: Using hardware interrupts.
+# Example 3: Using software interrupts.
 
 from __future__ import print_function
 import qwiic_kx13x
 import time
 import sys
-import RPi.GPIO
 
 def runExample():
 
@@ -62,15 +61,11 @@ def runExample():
         print("Make sure you're using the KX132 and not the KX134")
 
     # myKx.set_range(myKx.KX132_RANGE8G) # Update the range of the data output.
-    myKx.initialize(myKx.INT_SETTINGS) # Load basic settings 
-
-    dataReadyPin = 5
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(dataReadyPin, GPIO.IN)
+    myKx.initialize(myKx.SOFT_INT_SETTINGS) # Load basic settings 
 
     while True:
             
-        if GPIO.INPUT(dataReadyPin) == 1:
+        if myKx.data_trigger():
 
             myKx.get_accel_data()
             print("X: {0}g Y: {1}g Z: {2}g".format(myKx.kx132_accel.x,

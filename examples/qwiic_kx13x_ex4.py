@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 #-----------------------------------------------------------------------------
-# qwiic_kx13x_ex2.py
+# qwiic_kx13x_ex4.py
 #
 # Simple example for the Qwiic KX132/4 Accelerometer using hardware interrupts
-# to indicate that data is ready.
+# to indicate that the buffer is full and ready to be read.
 #------------------------------------------------------------------------
 #
 # Written by  SparkFun Electronics, April 2021
@@ -37,7 +37,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 # SOFTWARE.
 #==================================================================================
-# Example 2: Using hardware interrupts.
+# Example 4: Using the Buffer
 
 from __future__ import print_function
 import qwiic_kx13x
@@ -62,7 +62,7 @@ def runExample():
         print("Make sure you're using the KX132 and not the KX134")
 
     # myKx.set_range(myKx.KX132_RANGE8G) # Update the range of the data output.
-    myKx.initialize(myKx.INT_SETTINGS) # Load basic settings 
+    myKx.initialize(myKx.BUFFER_SETTINGS) # Load basic settings 
 
     dataReadyPin = 5
     GPIO.setmode(GPIO.BCM)
@@ -70,7 +70,7 @@ def runExample():
 
     while True:
             
-        if GPIO.INPUT(dataReadyPin) == 1:
+        if GPIO.INPUT(dataReadyPin) == 1: # When the buffer is full, the pin will go high
 
             myKx.get_accel_data()
             print("X: {0}g Y: {1}g Z: {2}g".format(myKx.kx132_accel.x,
