@@ -610,21 +610,21 @@ class QwiicKX132(QwiicKX13XCore):
         accel_range = accel_range >> 3
 
         if accel_range == self.KX132_RANGE2G:
-            self.kx132_accel.x = self.raw_output_data.x * self.CONV_2G
-            self.kx132_accel.y = self.raw_output_data.y * self.CONV_2G
-            self.kx132_accel.z = self.raw_output_data.z * self.CONV_2G
+            self.kx132_accel.x = round(self.raw_output_data.x * self.CONV_2G, 6)
+            self.kx132_accel.y = round(self.raw_output_data.y * self.CONV_2G, 6)
+            self.kx132_accel.z = round(self.raw_output_data.z * self.CONV_2G, 6)
         elif accel_range == self.KX132_RANGE4G:
-            self.kx132_accel.x = self.raw_output_data.x * self.CONV_4G
-            self.kx132_accel.y = self.raw_output_data.y * self.CONV_4G
-            self.kx132_accel.z = self.raw_output_data.z * self.CONV_4G
+            self.kx132_accel.x = round(self.raw_output_data.x * self.CONV_4G, 6)
+            self.kx132_accel.y = round(self.raw_output_data.y * self.CONV_4G, 6)
+            self.kx132_accel.z = round(self.raw_output_data.z * self.CONV_4G, 6)
         elif accel_range == self.KX132_RANGE8G:
-            self.kx132_accel.x = self.raw_output_data.x * self.CONV_8G
-            self.kx132_accel.y = self.raw_output_data.y * self.CONV_8G
-            self.kx132_accel.z = self.raw_output_data.z * self.CONV_8G
+            self.kx132_accel.x = round(self.raw_output_data.x * self.CONV_8G, 6)
+            self.kx132_accel.y = round(self.raw_output_data.y * self.CONV_8G, 6)
+            self.kx132_accel.z = round(self.raw_output_data.z * self.CONV_8G, 6)
         elif accel_range == self.KX132_RANGE16G:
-            self.kx132_accel.x = self.raw_output_data.x * self.CONV_16G
-            self.kx132_accel.y = self.raw_output_data.y * self.CONV_16G
-            self.kx132_accel.z = self.raw_output_data.z * self.CONV_16G
+            self.kx132_accel.x = round(self.raw_output_data.x * self.CONV_16G, 6)
+            self.kx132_accel.y = round(self.raw_output_data.y * self.CONV_16G, 6)
+            self.kx132_accel.z = round(self.raw_output_data.z * self.CONV_16G, 6)
 
 
 class QwiicKX134(QwiicKX13XCore):
@@ -678,19 +678,19 @@ class QwiicKX134(QwiicKX13XCore):
         accel_range = accel_range >> 3
 
         if accel_range == self.KX134_RANGE8G:
-            self.kx134_accel.x = self.raw_output_data.x * self.CONV_8G
-            self.kx134_accel.y = self.raw_output_data.y * self.CONV_8G
-            self.kx134_accel.z = self.raw_output_data.z * self.CONV_8G
+            self.kx134_accel.x = round(self.raw_output_data.x * self.CONV_8G)
+            self.kx134_accel.y = round(self.raw_output_data.y * self.CONV_8G)
+            self.kx134_accel.z = round(self.raw_output_data.z * self.CONV_8G)
         elif accel_range == self.KX134_RANGE16G:
-            self.kx134_accel.x = self.raw_output_data.x * self.CONV_16G
-            self.kx134_accel.y = self.raw_output_data.y * self.CONV_16G
-            self.kx134_accel.z = self.raw_output_data.z * self.CONV_16G
+            self.kx134_accel.x = round(self.raw_output_data.x * self.CONV_16G)
+            self.kx134_accel.y = round(self.raw_output_data.y * self.CONV_16G)
+            self.kx134_accel.z = round(self.raw_output_data.z * self.CONV_16G)
         elif accel_range == self.KX134_RANGE32G:
-            self.kx134_accel.x = self.raw_output_data.x * self.CONV_32G
-            self.kx134_accel.y = self.raw_output_data.y * self.CONV_32G
-            self.kx134_accel.z = self.raw_output_data.z * self.CONV_32G
+            self.kx134_accel.x = round(self.raw_output_data.x * self.CONV_32G)
+            self.kx134_accel.y = round(self.raw_output_data.y * self.CONV_32G)
+            self.kx134_accel.z = round(self.raw_output_data.z * self.CONV_32G)
         elif accel_range == self.KX134_RANGE64G:
-            self.kx134_accel.x = self.raw_output_data.x * self.CONV_64G
-            self.kx134_accel.y = self.raw_output_data.y * self.CONV_64G
-            self.kx134_accel.z = self.raw_output_data.z * self.CONV_64G
+            self.kx134_accel.x = round(self.raw_output_data.x * self.CONV_64G)
+            self.kx134_accel.y = round(self.raw_output_data.y * self.CONV_64G)
+            self.kx134_accel.z = round(self.raw_output_data.z * self.CONV_64G)
 
