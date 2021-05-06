@@ -17,12 +17,12 @@ sys.path.insert(0, os.path.abspath('.'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'sparkfun_<example_name>_py'
+project = 'sparkfun_qwiic_kx13x_py'
 copyright = '2021, SparkFun Electronics'
 author = 'SparkFun Electronics'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.01'
+release = '1.0.0'
 
 
 # -- General configuration ---------------------------------------------------
