@@ -1,4 +1,4 @@
-Qwiic_KXI13X_Py
+Qwiic_KX13X_Py
 ==================
 
 <p align="center">
