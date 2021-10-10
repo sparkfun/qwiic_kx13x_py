@@ -328,8 +328,8 @@ class QwiicKX13XCore(object):
         """
             This functions controls the accelerometers power on and off state.
             :param enable: True or false indicating power on or off
-            respectively. 
-            :return: Returns false when an incorrect argumen has been passed.
+            respectively
+            :return: Returns false when an incorrect argument has been passed.
             :rtype: bool
         """
         if enable != True and enable != False:
