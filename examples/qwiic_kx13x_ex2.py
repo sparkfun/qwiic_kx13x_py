@@ -43,11 +43,11 @@ from __future__ import print_function
 import qwiic_kx13x
 import time
 import sys
-import RPi.GPIO
+import RPi.GPIO as GPIO
 
 def runExample():
 
-    print("\nSparkFun KX13X Accelerometer Example 1\n")
+    print("\nSparkFun KX13X Accelerometer Example 2\n")
     # myKx = qwiic_kx13x.QwiicKX134() # If using the KX134 un-comment this line and replace other instances of "kx132" with "kx134"
     myKx = qwiic_kx13x.QwiicKX132()
 
@@ -70,7 +70,7 @@ def runExample():
 
     while True:
             
-        if GPIO.INPUT(dataReadyPin) == 1:
+        if GPIO.input(dataReadyPin) == 1:
 
             myKx.get_accel_data()
             print("X: {0}g Y: {1}g Z: {2}g".format(myKx.kx132_accel.x,
@@ -83,5 +83,5 @@ if __name__ == '__main__':
 	try:
 		runExample()
 	except (KeyboardInterrupt, SystemExit) as exErr:
-		print("\nEnding Example 1")
+		print("\nEnding Example 2")
 		sys.exit(0)
