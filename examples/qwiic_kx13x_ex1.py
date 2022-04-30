@@ -61,7 +61,7 @@ def runExample():
         print("Make sure you're using the KX132 and not the KX134")
 
     # myKx.set_range(myKx.KX132_RANGE8G) # Update the range of the data output.
-    myKx.initialize(myKx.BASIC_SETTINGS) # Load basic settings 
+    myKx.initialize(myKx.DEFAULT_SETTINGS) # Load basic settings 
 
     while True:
             
