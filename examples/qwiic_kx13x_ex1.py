@@ -66,10 +66,10 @@ def runExample():
     while True:
             
         myKx.get_accel_data()
-        print("X: {0}g Y: {1}g Z: {2}g".format(myKx.kx134_accel.x,
+        print("X: {0:.2f}g Y: {1:.2f}g Z: {2:.2f}g".format(myKx.kx134_accel.x,
                                                myKx.kx134_accel.y,
                                                myKx.kx134_accel.z))
-        time.sleep(.02) #Set delay to 1/Output Data Rate which is by default 50Hz 1/50 = .02
+        time.sleep(.5) #Set delay to 1/Output Data Rate which is by default 50Hz 1/50 = .02
 
 
 if __name__ == '__main__':
