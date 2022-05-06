@@ -573,7 +573,7 @@ class QwiicKX13XCore(object):
         reg_val = self._i2c.readByte(self.address, self.KX13X_INC4)
         if reg_val & 0x40:
             msb = 1 << self.TOTAL_ACCEL_DATA_16BIT
-            accel_data = self._i2c.readBlock(self.address, self.KX13X_XOUT_L, elf.TOTAL_ACCEL_DATA_16BIT)
+            accel_data = self._i2c.readBlock(self.address, self.KX13X_XOUT_L, self.TOTAL_ACCEL_DATA_16BIT)
             xData = (accel_data[self.XMSB] << 8) | accel_data[self.XLSB]
             yData = (accel_data[self.YMSB] << 8) | accel_data[self.YLSB]
             zData = (accel_data[self.ZMSB] << 8) | accel_data[self.ZLSB]
