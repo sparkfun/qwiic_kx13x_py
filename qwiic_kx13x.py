@@ -397,7 +397,7 @@ class QwiicKX13XCore(object):
         reg_val &= 0x40
         reg_val |= rate
         self._i2c.writeByte(self.address, self.KX13X_ODCNTL , reg_val)
-        self.accelControl(accel_state)
+        self.accel_control(accel_state)
 
 
     def get_output_data_rate(self):
