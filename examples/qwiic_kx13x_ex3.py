@@ -46,7 +46,7 @@ import sys
 
 def runExample():
 
-    print("\nSparkFun KX13X Accelerometer Example 1\n")
+    print("\nSparkFun KX13X Accelerometer Example 3\n")
     # myKx = qwiic_kx13x.QwiicKX134() # If using the KX134 un-comment this line and replace other instances of "kx132" with "kx134"
     myKx = qwiic_kx13x.QwiicKX132()
 
@@ -78,5 +78,5 @@ if __name__ == '__main__':
 	try:
 		runExample()
 	except (KeyboardInterrupt, SystemExit) as exErr:
-		print("\nEnding Example 1")
+		print("\nEnding Example 3")
 		sys.exit(0)
