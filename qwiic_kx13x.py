@@ -54,9 +54,7 @@ New to qwiic? Take a look at the entire [SparkFun qwiic ecosystem](https://www.s
 """
 
 #-----------------------------------------------------------------------------
-from __future__ import print_function
 import qwiic_i2c
-from collections import namedtuple
 
 # Define the device name and I2C addresses. These are set in the class defintion
 # as class variables, making them avilable without having to create a class instance.
@@ -79,6 +77,12 @@ _WHO_AM_I = [0x3D, 0x46]
 # define the class that encapsulates the device being created. All information associated with this
 # device is encapsulated by this class. The device class should be the only value exported
 # from this module.
+
+class AccelerationData(object):
+    def __init__(self, x=0, y=0, z=0):
+        self.x = x
+        self.y = y
+        self.z = z
 
 class QwiicKX13XCore(object):
     """
@@ -228,8 +232,6 @@ class QwiicKX13XCore(object):
     HI_BUFFER_FULL    = 0x40
     HI_FREEFALL       = 0x80
 
-    raw_output_data = namedtuple('raw_output_data', 'x y z')
-
     # Constructor
     def __init__(self, address=None, i2c_driver=None):
 
@@ -245,6 +247,8 @@ class QwiicKX13XCore(object):
                 return
         else:
             self._i2c = i2c_driver
+        
+        self.raw_output_data = AccelerationData(0,0,0)
 
     # ----------------------------------
     # is_connected()
@@ -567,10 +571,11 @@ class QwiicKX13XCore(object):
     def get_raw_accel_data(self):
         """
             Checks which registers are storing acceleration data and retrieves
-            it, storing it in a named tuple local to the class.
+            it
         """
 
         reg_val = self._i2c.readByte(self.address, self.KX13X_INC4)
+        
         if reg_val & 0x40:
             accel_data = self._i2c.readBlock(self.address, self.KX13X_XOUT_L, self.TOTAL_ACCEL_DATA_16BIT)
             xData = (accel_data[self.XMSB] << 8) | accel_data[self.XLSB]
@@ -599,10 +604,9 @@ class QwiicKX132(QwiicKX13XCore):
     CONV_8G =  .0002441407513657033
     CONV_16G = .0004882811975463118
 
-    kx132_accel = namedtuple('kx132_accel', 'x y z')
-
     def __init__(self, address = None, i2c_driver = None):
         super().__init__(address, i2c_driver)
+        self.kx132_accel = AccelerationData(0,0,0)
 
     def begin(self):
         """
@@ -620,15 +624,15 @@ class QwiicKX132(QwiicKX13XCore):
 
     def get_accel_data(self):
         """
-            Retrieves acceleration data and converts it, storing it within a
-            named tuple local to the QwiicKX132 class.
+            Retrieves acceleration data and converts it, and stores it
         """
         self.get_raw_accel_data()
         self.conv_accel_data()
+
 def conv_accel_data(self):
         """
             Converts raw acceleration data according to the range setting and
-            stores it in a named tuple local to the QwiicKX132.
+            stores it
         """
         accel_range = self._i2c.readByte(self.address, self.KX13X_CNTL1)
         accel_range &= 0x18
@@ -665,10 +669,9 @@ class QwiicKX134(QwiicKX13XCore):
     CONV_32G = .000976523950926236762
     CONV_64G = .001953125095370342112
 
-    kx134_accel = namedtuple('kx134_accel', 'x y z')
-
     def __init__(self, address = None, i2c_driver = None):
         super().__init__(address, i2c_driver)
+        self.kx134_accel = AccelerationData(0,0,0)
 
     def begin(self):
         """
@@ -686,8 +689,7 @@ class QwiicKX134(QwiicKX13XCore):
 
     def get_accel_data(self):
         """
-            Retrieves acceleration data and converts it, storing it within a
-            named tuple local to the QwiicKX134 class.
+            Retrieves acceleration data and converts it, and stores it
         """
         self.get_raw_accel_data()
         self.conv_accel_data()
@@ -695,7 +697,7 @@ class QwiicKX134(QwiicKX13XCore):
     def conv_accel_data(self):
         """
             Converts raw acceleration data according to the range setting and
-            stores it in a named tuple local to the QwiicKX132.
+            stores it
         """
         accel_range = self._i2c.readByte(self.address, self.KX13X_CNTL1)
         accel_range &= 0x18

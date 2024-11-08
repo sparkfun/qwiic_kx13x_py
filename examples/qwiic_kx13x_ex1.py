@@ -39,7 +39,6 @@
 # Example 1
 # A simple example for the kx132 showing asychronous data streaming i.e. continuous streaming.
 
-from __future__ import print_function
 import qwiic_kx13x
 import time
 import sys

@@ -39,7 +39,6 @@
 #==================================================================================
 # Example 2: Using hardware interrupts.
 
-from __future__ import print_function
 import qwiic_kx13x
 import time
 import sys
