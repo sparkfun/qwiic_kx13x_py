@@ -723,7 +723,8 @@ class QwiicKX13XCore(object):
         self._i2c.writeByte(self.address, self.KX13X_CNTL2, 0x00)
         self._i2c.writeByte(self.address, self.KX13X_CNTL2, 0x80)
 
-        # Wait for the SRST bit to be cleared. Reset takes about 2ms. Timeout after 10ms
+        # Wait for the SRST bit to be cleared. Reset takes about 2ms. Timeout if we still see the SRST bit set after 10ms.
+        sleep(0.003)
         reset_read_tries = 0
         while reset_read_tries < 10:
             if self._i2c.readByte(self.address, self.KX13X_CNTL2) & 0x80 == 0:

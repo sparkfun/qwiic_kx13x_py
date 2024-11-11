@@ -60,8 +60,8 @@ def runExample():
     else:
         print("Make sure you're using the KX132 and not the KX134")
 
-    # if (myKx.software_reset()):
-    #     print("Reset")
+    if (myKx.software_reset()):
+        print("Reset")
 
     # Many settings for KX13X can only be
     # applied when the accelerometer is powered down.
