@@ -55,6 +55,7 @@ New to qwiic? Take a look at the entire [SparkFun qwiic ecosystem](https://www.s
 
 #-----------------------------------------------------------------------------
 import qwiic_i2c
+from time import sleep
 
 # Define the device name and I2C addresses. These are set in the class defintion
 # as class variables, making them avilable without having to create a class instance.
@@ -232,6 +233,8 @@ class QwiicKX13XCore(object):
     HI_BUFFER_FULL    = 0x40
     HI_FREEFALL       = 0x80
 
+
+
     # Constructor
     def __init__(self, address=None, i2c_driver=None):
 
@@ -293,7 +296,7 @@ class QwiicKX13XCore(object):
             :return: No return value.
 
         """
-        self.accel_control(False)
+        self.enable_accel(False)
 
         if settings == self.DEFAULT_SETTINGS:
             self._i2c.writeByte(self.address, self.KX13X_CNTL1, self.DEFAULT_SETTINGS)
@@ -322,13 +325,13 @@ class QwiicKX13XCore(object):
         self._i2c.writeByte(self.address, self.KX13X_CNTL2 , reg_val)
 
         reg_val = self._i2c.readByte(self.address, self.KX13X_COTR)
-        if reg_val == COTR_POS_STATE:
+        if reg_val == self.COTR_POS_STATE:
             return True
         else:
             return False
 
 
-    def accel_control(self, enable):
+    def enable_accel(self, enable=True):
         """
             This functions controls the accelerometers power on and off state.
             :param enable: True or false indicating power on or off
@@ -352,7 +355,6 @@ class QwiicKX13XCore(object):
         """
         reg_val = self._i2c.readByte(self.address, self.KX13X_CNTL1)
         return (reg_val & 0x80) >> 7
-    #temperature_celsius = property(get_temperature_celsius)
 
     def set_range(self, kx13x_range):
         """
@@ -395,13 +397,13 @@ class QwiicKX13XCore(object):
             return False
 
         accel_state = self.get_accel_state()
-        self.accel_control(False)
+        self.enable_accel(False)
 
         reg_val = self._i2c.readByte(self.address, self.KX13X_ODCNTL)
         reg_val &= 0x40
         reg_val |= rate
         self._i2c.writeByte(self.address, self.KX13X_ODCNTL , reg_val)
-        self.accel_control(accel_state)
+        self.enable_accel(accel_state)
 
 
     def get_output_data_rate(self):
@@ -443,7 +445,7 @@ class QwiicKX13XCore(object):
             return False
 
         accel_state = self.get_accel_state()
-        self.accel_control(False)
+        self.enable_accel(False)
 
         combined_arguments = (pulse_width << 6) | (enable << 5) | (polarity << 4) | (latch_control << 3)
 
@@ -472,15 +474,15 @@ class QwiicKX13XCore(object):
             return False
 
         accel_state = self.get_accel_state()
-        self.accel_control(False)
+        self.enable_accel(False)
 
         if pin == 1:
             self._i2c.writeByte(self.address, self.KX13X_INC4 , rdr)
-            self.accel_control(accel_state)
+            self.enable_accel(accel_state)
             return True
         else:
             self._i2c.writeByte(self.address, self.KX13X_INC6 , rdr)
-            self.accel_control(accel_state)
+            self.enable_accel(accel_state)
             return True
 
     def clear_interrupt(self):
@@ -491,7 +493,7 @@ class QwiicKX13XCore(object):
         """
         self._i2c.readByte(self.address, self.KX13X_INT_REL)
 
-    def data_trigger(self):
+    def data_ready(self):
         """
             Reads the register indicating whether data is ready to be read.
             :return: Returns true if data is ready to be read and false
@@ -570,28 +572,176 @@ class QwiicKX13XCore(object):
 
     def get_raw_accel_data(self):
         """
-            Checks which registers are storing acceleration data and retrieves
-            it
+            Retrieves the raw register values representing accelerometer data.
+
+            Note: this method does not check if the registers contain valid data.
+            The user needs to do that externally by calling dataReady
+            or using the INT pins to indicate that data is ready.
         """
 
-        reg_val = self._i2c.readByte(self.address, self.KX13X_INC4)
+        accel_data = self._i2c.readBlock(self.address, self.KX13X_XOUT_L, self.TOTAL_ACCEL_DATA_16BIT)
         
-        if reg_val & 0x40:
-            accel_data = self._i2c.readBlock(self.address, self.KX13X_XOUT_L, self.TOTAL_ACCEL_DATA_16BIT)
-            xData = (accel_data[self.XMSB] << 8) | accel_data[self.XLSB]
-            yData = (accel_data[self.YMSB] << 8) | accel_data[self.YLSB]
-            zData = (accel_data[self.ZMSB] << 8) | accel_data[self.ZLSB]
-        else:
-            accel_data = self._i2c.readBlock(self.address, self.KX13X_XOUT_L, self.TOTAL_ACCEL_DATA_8BIT)
-            xData = accel_data[0]
-            yData = accel_data[1]
-            zData = accel_data[2]
+        ux = (accel_data[self.XMSB] << 8) | accel_data[self.XLSB]
+        uy = (accel_data[self.YMSB] << 8) | accel_data[self.YLSB]
+        uz = (accel_data[self.ZMSB] << 8) | accel_data[self.ZLSB]
 
-        self.raw_output_data.x = xData
-        self.raw_output_data.y = yData
-        self.raw_output_data.z = zData
+        # Convert to signed 16-bit ints
+        if ux > 32767:
+            ux -= 65536
+        if uy > 32767:
+            uy -= 65536
+        if uz > 32767:
+            uz -= 65536
+
+        self.raw_output_data.x = ux
+        self.raw_output_data.y = uy
+        self.raw_output_data.z = uz
+
+    def software_reset(self):
+        """
+            Resets the accelerometer
+
+            Kionix Technical Reference Manual says:
+            "To change the value of the SRST bit, the PC1 bit in CNTL1 register must first be set to 0."
+
+            Kionix TN027 "Power On Procedure" says to:
+            Write 0x00 to register 0x7F
+            Write 0x00 to CNTL2
+            Write 0x80 (SRST) to CNTL2
+
+            Kionix Technical Reference Manual says:
+            "For I2C Communication: Setting SRST = 1 will NOT result in an ACK, since the part immediately
+            enters the RAM reboot routine. NACK may be used to confirm this command."
+            However, we've not seen the NACK when writing the SRST bit. That write always seems to be ACK'd as normal.
+            But, the _next_ I2C transaction _does_ get NACK'd...
+            The solution seems to be to keep trying to read CNTL2 and wait for the SRST bit to be cleared.
+
+            :return: True if the reset was successful, False otherwise.
+        """
+        
+        self.enable_accel(False)
+
+        self._i2c.writeByte(self.address, 0x7F, 0x00)
+        self._i2c.writeByte(self.address, self.KX13X_CNTL2, 0x00)
+        self._i2c.writeByte(self.address, self.KX13X_CNTL2, 0x80)
+
+        # Wait for the SRST bit to be cleared. Reset takes about 2ms. Timeout after 10ms
+        reset_read_tries = 0
+        while reset_read_tries < 10:
+            if self._i2c.readByte(self.address, self.KX13X_CNTL2) & 0x80 == 0:
+                return True
+
+            reset_read_tries += 1
+            sleep(0.001)
+        
+        return False
+    
+    def enable_data_engine(self, enable=True):
+        """
+            Enables the data ready bit.
+
+            :param enable: True to enable the data engine, False to disable it.
+        """
+
+        kDataReadyBitMask = 0b1 << 5
+        reg_val = self._i2c.readByte(self.address, self.KX13X_CNTL1)
+        
+        
+        reg_val &= ~kDataReadyBitMask
+        if (enable):
+            reg_val |= kDataReadyBitMask
+
+        self._i2c.writeByte(self.address, self.KX13X_CNTL1, reg_val)
+    
+    def enable_tap_engine(self,enable=True):
+        """
+            Enables the tap and double tap features of the accelerometers
+
+            :param enable: True to enable the tap engine, False to disable it.
+        """
+
+        kTapEngineBitMask = 0b1 << 2
+        reg_val = self._i2c.readByte(self.address, self.KX13X_CNTL1)
+        
+        reg_val &= ~kTapEngineBitMask
+        if (enable):
+            reg_val |= kTapEngineBitMask
+
+        self._i2c.writeByte(self.address, self.KX13X_CNTL1, reg_val)
+    
+    def enable_direct_tap_interrupt(self, enable=True):
+        """
+            Enables reporting on the direction of the latest generated tap.
+
+            :param enable: True to enable the direct tap interrupt, False to disable it.
+        """
+
+        kDirectTapInterruptBitMask = 0b1 << 0
+        reg_val = self._i2c.readByte(self.address, self.KX13X_TDTRC)
+        
+        reg_val &= ~kDirectTapInterruptBitMask
+        if (enable):
+            reg_val |= kDirectTapInterruptBitMask
+
+        self._i2c.writeByte(self.address, self.KX13X_TDTRC, reg_val)
 
 
+    def tap_detected(self):
+        """
+            Checks the tap interrupt bit indicating that a tap has
+            been detected.
+
+            :return: True if a tap has been detected, False otherwise.
+        """
+
+        kTapDetectedShift = 2
+        kTapDetectedMask = 0b11 << 2
+        reg_val = self._i2c.readByte(self.address, self.KX13X_INS2)
+        
+        tap_result = (reg_val & kTapDetectedMask) >> kTapDetectedShift
+
+        kSingleTapStatusResult = 0x01
+        return tap_result == kSingleTapStatusResult
+
+    def get_direction(self):
+        """
+            If the tap direction bit is enabled, this register will report
+            the direction of the detected tap.
+        """
+
+        return self._i2c.readByte(self.address, self.KX13X_INS1)
+    
+    def unknown_tap(self):
+        """
+            if the accelerometer is unsure whether it has in fact
+            detected a tap, it will report an "unknown" state. in that
+            case this function will return true. good for error checking.
+        """
+            
+        kTapDetectedShift = 2
+        kTapDetectedMask = 0b11 << 2
+        reg_val = self._i2c.readByte(self.address, self.KX13X_INS2)
+        
+        tap_result = (reg_val & kTapDetectedMask) >> kTapDetectedShift
+
+        kUnknownTapStatusResult = 0x03
+        return tap_result == kUnknownTapStatusResult
+    
+    def double_tap_detected(self):
+        """
+            Checks the double tap interrupt bit indicating that
+            a double tap has been detected.
+        """
+
+        kTapDetectedShift = 2
+        kTapDetectedMask = 0b11 << 2
+        reg_val = self._i2c.readByte(self.address, self.KX13X_INS2)
+        
+        tap_result = (reg_val & kTapDetectedMask) >> kTapDetectedShift
+
+        kDoubleTapStatusResult = 0x02
+        return tap_result == kDoubleTapStatusResult
+            
 class QwiicKX132(QwiicKX13XCore):
 
     KX132_WHO_AM_I = 0x3D

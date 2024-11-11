@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 #-----------------------------------------------------------------------------
-# qwiic_kx13x_ex3.py
+# qwiic_kx13x_ex4.py
 #
-# Simple example for the Qwiic KX132/4 Accelerometer using software interrupts
-# to indicate that data is ready.
+# Example for the Qwiic KX132/4 Accelerometer that shows the how to enable the tap interrupts.
 #------------------------------------------------------------------------
 #
-# Written by  SparkFun Electronics, April 2021
+# Written by  SparkFun Electronics, November 2024
 # 
 # This python library supports the SparkFun Electroncis qwiic 
 # qwiic sensor/board ecosystem on a Raspberry Pi (and compatable) single
@@ -37,7 +36,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 # SOFTWARE.
 #==================================================================================
-# Example 3: Using software interrupts.
+# Example 1
+# A simple example for the kx132 showing asychronous data streaming i.e. continuous streaming.
 
 import qwiic_kx13x
 import time
@@ -45,37 +45,46 @@ import sys
 
 def runExample():
 
-    print("\nSparkFun KX13X Accelerometer Example 3\n")
+    print("\nSparkFun KX13X Accelerometer Example 4: Tap\n")
     # myKx = qwiic_kx13x.QwiicKX134() # If using the KX134 un-comment this line and replace other instances of "kx132" with "kx134"
     myKx = qwiic_kx13x.QwiicKX132()
 
     if myKx.connected == False:
-        print("The Qwiic KX13X Accelerometer device isn't connected to the system. Please check your connection", \
-                file=sys.stderr)
-        return
+            print("The Qwiic KX13X Accelerometer device isn't connected to the system. Please check your connection", \
+                    file=sys.stderr)
+            return
 
     if myKx.begin():
         print("Ready.")
     else:
         print("Make sure you're using the KX132 and not the KX134")
 
-    # myKx.set_range(myKx.KX132_RANGE8G) # Update the range of the data output.
-    myKx.initialize(myKx.SOFT_INT_SETTINGS) # Load basic settings 
+    # if (myKx.software_reset()):
+    #     print("Reset")
+
+    # Many settings for KX13X can only be
+    # applied when the accelerometer is powered down.
+    # However there are many that can be changed "on-the-fly"
+    # check datasheet for more info
+    myKx.enable_accel(False)
+    # myKx.set_range(myKx.KX134_RANGE16G)  # If using the KX134 un-comment this line and comment out below line
+    myKx.set_range(myKx.KX132_RANGE16G)
+    myKx.enable_tap_engine()
+    myKx.enable_accel()
 
     while True:
-            
-        if myKx.data_trigger():
+        if myKx.tap_detected():    
+            print("Tap Detected: ", hex(myKx.get_direction()))
+            myKx.clear_interrupt()
+        
+        if myKx.unknown_tap() or myKx.double_tap_detected():
+            myKx.clear_interrupt()
 
-            myKx.get_accel_data()
-            print("X: {0}g Y: {1}g Z: {2}g".format(myKx.kx132_accel.x,
-                                                   myKx.kx132_accel.y,
-                                                   myKx.kx132_accel.z))
-
-        time.sleep(.02) #Set delay to 1/Output Data Rate which is by default 50Hz 1/50 = .02
+        time.sleep(.025) # Delay should be 1/ODR (Output Data Rate), default tap ODR is 400Hz
 
 if __name__ == '__main__':
 	try:
 		runExample()
 	except (KeyboardInterrupt, SystemExit) as exErr:
-		print("\nEnding Example 3")
+		print("\nEnding Example 1")
 		sys.exit(0)

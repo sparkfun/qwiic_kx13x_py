@@ -5,7 +5,7 @@
 # Simple example for the Qwiic KX132/4 Accelerometer
 #------------------------------------------------------------------------
 #
-# Written by  SparkFun Electronics, April 2021
+# Written by  SparkFun Electronics, November 2024
 # 
 # This python library supports the SparkFun Electroncis qwiic 
 # qwiic sensor/board ecosystem on a Raspberry Pi (and compatable) single
@@ -37,7 +37,8 @@
 # SOFTWARE.
 #==================================================================================
 # Example 1
-# A simple example for the kx132 showing asychronous data streaming i.e. continuous streaming.
+# A simple example for the kx132 showing the basic settings and functions for retrieving accelerometer
+# data
 
 import qwiic_kx13x
 import time
@@ -59,17 +60,30 @@ def runExample():
     else:
         print("Make sure you're using the KX132 and not the KX134")
 
-    # myKx.set_range(myKx.KX132_RANGE8G) # Update the range of the data output.
-    myKx.initialize(myKx.DEFAULT_SETTINGS) # Load basic settings 
+    # if (myKx.software_reset()):
+    #     print("Reset")
+
+    # Many settings for KX13X can only be
+    # applied when the accelerometer is powered down.
+    # However there are many that can be changed "on-the-fly"
+    # check datasheet for more info
+    myKx.enable_accel(False)
+    # myKx.set_range(myKx.KX134_RANGE16G)  # If using the KX134 un-comment this line and comment out below line
+    myKx.set_range(myKx.KX132_RANGE16G)
+    myKx.enable_data_engine()
+    myKx.enable_accel()
 
     while True:
-            
-        myKx.get_accel_data()
-        print("X: {0}g Y: {1}g Z: {2}g".format(myKx.kx132_accel.x,
-                                               myKx.kx132_accel.y,
-                                               myKx.kx132_accel.z))
-        time.sleep(.02) #Set delay to 1/Output Data Rate which is by default 50Hz 1/50 = .02
-
+        if myKx.data_ready():    
+            myKx.get_accel_data()
+            # If using the KX134 un-comment the print below and comment out the print below that
+            # print("X: {0}g Y: {1}g Z: {2}g".format(myKx.kx134_accel.x,
+            #                         myKx.kx134_accel.y,
+            #                         myKx.kx134_accel.z))
+            print("X: {0} Y: {1} Z: {2}".format(myKx.kx132_accel.x,
+                                                myKx.kx132_accel.y,
+                                                myKx.kx132_accel.z))
+            time.sleep(.02) #Set delay to 1/Output Data Rate which is by default 50Hz 1/50 = .02
 
 if __name__ == '__main__':
 	try:
