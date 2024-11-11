@@ -194,7 +194,7 @@ class QwiicKX13XCore(object):
     KX13X_SELF_TEST        = 0x5D
     KX13X_BUF_CNTL1        = 0x5E
     KX13X_BUF_CNTL2        = 0x5F
-    KX14X_BUF_STATUS_1     = 0x60
+    KX13X_BUF_STATUS_1     = 0x60
     KX13X_BUF_STATUS_2     = 0x61
     KX13X_BUF_CLEAR        = 0x62
     KX13X_BUF_READ         = 0x63
@@ -454,8 +454,6 @@ class QwiicKX13XCore(object):
         reg_val |= combined_arguments
         self._i2c.writeByte(self.address, self.KX13X_INC1 , reg_val)
 
-
-
     def route_hardware_interrupt(self, rdr, pin = 1):
         """
             Determines which interrupt is reported: freefall, buffer full,
@@ -484,6 +482,43 @@ class QwiicKX13XCore(object):
             self._i2c.writeByte(self.address, self.KX13X_INC6 , rdr)
             self.enable_accel(accel_state)
             return True
+    
+    def enable_phys_interrupt(self, enable = True, pin = 1):
+        """
+            Enables interrupts to be routed to the interrupt pins.
+
+            :param enable: Whether to enable or disable the physical interrupt pin
+            :param pin: The interrupt pin to enable or disable
+            :return: Returns true after configuring the register and false if an an
+            incorrect argument is given.
+            :rtype: bool
+        """
+        if pin > 2 or pin <= 0:
+            return False
+        
+        # Same bit for both pins
+        kIenReadyBitMask = 0b1 << 5
+            
+        if pin == 1:
+            reg_val = self._i2c.readByte(self.address, self.KX13X_INC1)
+            
+            reg_val &= ~kIenReadyBitMask
+            if (enable):
+                reg_val |= kIenReadyBitMask
+
+            self._i2c.writeByte(self.address, self.KX13X_INC1, reg_val)
+    
+        if pin == 2:
+            reg_val = self._i2c.readByte(self.address, self.KX13X_INC5)
+            
+            reg_val &= ~kIenReadyBitMask
+            if (enable):
+                reg_val |= kIenReadyBitMask
+
+            self._i2c.writeByte(self.address, self.KX13X_INC5, reg_val)
+        
+        return True
+
 
     def clear_interrupt(self):
         """
@@ -526,16 +561,18 @@ class QwiicKX13XCore(object):
 
         self._i2c.writeByte(self.address, self.KX13X_BUF_CNTL1, threshold)
 
-    def set_buffer_operation(self, operation_mode, resolution):
+    def set_buffer_operation_and_resolution(self, operation_mode, resolution=True):
         """
             Sets the mode and resolution of the samples stored in the buffer.
             :param operation_mode: Sets the mode:
                                    BUFFER_MODE_FIFO
                                    BUFFER_MODE_STREAM
                                    BUFFER_MODE_TRIGGER
-            :param resolution: Sets the resolution of the samples, 8 or 16 bit.
+            :param resolution: Sets the resolution of the samples, 8 or 16 bit. (True = 16 bit, False = 8 bit)
             :return: Returns false if an incorrect argument is given.
             :rtype: bool
+
+            NOTE: This combines the functionality of the setBufferResolution and setBufferOperationMode methods from the arduino library
         """
         if resolution < 0 or resolution > 1:
             return False
@@ -549,7 +586,7 @@ class QwiicKX13XCore(object):
         reg_val |= combined_arguments
         self._i2c.writeByte(self.address, self.KX13X_BUF_CNTL2 , reg_val)
 
-    def enable_buffer(self, enable, enable_interrupt):
+    def enable_buffer_and_interrupt(self, enable = True, enable_interrupt = True):
         """
             Enables the buffer and whether the buffer triggers an interrupt
             when full.
@@ -557,6 +594,8 @@ class QwiicKX13XCore(object):
             :param enable: Enables the buffer's interrupt.
             :return: Returns false if an incorrect argument is given.
             :rtype: bool
+
+            NOTE: This combines the functionality of the enableSampleBuffer and enableBufferInt methods from the arduino library
         """
         if enable != True and enable != False:
             return False
@@ -596,6 +635,65 @@ class QwiicKX13XCore(object):
         self.raw_output_data.x = ux
         self.raw_output_data.y = uy
         self.raw_output_data.z = uz
+
+    def get_raw_accel_buffer_data(self, sixteenBit = -1):
+        """
+            Retrieves the raw buffer values representing accelerometer data.
+
+            If sixteenBit is -1 (the default), the code reads the Buffer Control Register 2 bres
+            bit to determine if the buffer data is 8-bit or 16-bit. You can speed up the code
+            by setting sixteenBit to: 0 for 8-bit data; 1 for 16-bit data.
+
+            Note: theis method does not check if the buffer contains valid data.
+            The user needs to do that externally by calling getSampleLevel
+            or using the INT pins to indicate that data is ready.
+
+            :return: Returns false if an incorrect argument is given.
+            :rtype: bool
+        """
+        if sixteenBit > 1 or sixteenBit < -1:
+            return False
+        
+        if sixteenBit == -1:
+            # Need to manually check the resolution
+            reg_val = self._i2c.readByte(self.address, self.KX13X_BUF_CNTL2)
+
+            kBresMask = 1 << 6
+            if reg_val & kBresMask:
+                sixteenBit = 1
+            else:
+                sixteenBit = 0
+
+        if sixteenBit == 1:
+            # 16 bit data
+            accel_data = self._i2c.readBlock(self.address, self.KX13X_BUF_READ, self.TOTAL_ACCEL_DATA_16BIT)
+            
+            ux = (accel_data[self.XMSB] << 8) | accel_data[self.XLSB]
+            uy = (accel_data[self.YMSB] << 8) | accel_data[self.YLSB]
+            uz = (accel_data[self.ZMSB] << 8) | accel_data[self.ZLSB]
+
+        if sixteenBit == 0:
+            # 8 bit data
+            accel_data = self._i2c.readBlock(self.address, self.KX13X_BUF_READ, self.TOTAL_ACCEL_DATA_8BIT)
+            
+            ux = (accel_data[0] << 8)
+            uy = (accel_data[1] << 8)
+            uz = (accel_data[2] << 8)
+        
+        # Convert to signed 16-bit ints
+        if ux > 32767:
+            ux -= 65536
+        if uy > 32767:
+            uy -= 65536
+        if uz > 32767:
+            uz -= 65536
+
+        self.raw_output_data.x = ux
+        self.raw_output_data.y = uy
+        self.raw_output_data.z = uz
+
+        return True
+
 
     def software_reset(self):
         """
@@ -645,7 +743,6 @@ class QwiicKX13XCore(object):
 
         kDataReadyBitMask = 0b1 << 5
         reg_val = self._i2c.readByte(self.address, self.KX13X_CNTL1)
-        
         
         reg_val &= ~kDataReadyBitMask
         if (enable):
@@ -741,6 +838,18 @@ class QwiicKX13XCore(object):
 
         kDoubleTapStatusResult = 0x02
         return tap_result == kDoubleTapStatusResult
+
+    def get_sample_level(self):
+        """
+            Gets the number of samples in the Buffer.
+
+           :return: Returns integer number of samples in the buffer
+        """
+
+        reg_val = self._i2c.read_block(self.address, self.KX13X_BUF_STATUS_1, 2)
+
+        # See page 44 of reference manual, sample level is 10 bits with the two most significant bits in the second byte
+        return ( (reg_val[1] & 0x03) << 8) | reg_val[0]
             
 class QwiicKX132(QwiicKX13XCore):
 

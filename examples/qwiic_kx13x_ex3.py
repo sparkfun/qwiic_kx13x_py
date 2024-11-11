@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 #-----------------------------------------------------------------------------
-# qwiic_kx13x_ex4.py
+# qwiic_kx13x_ex3.py
 #
-# Example for the Qwiic KX132/4 Accelerometer that shows the how to enable the tap interrupts.
+#  This example shows both how to setup the buffer but also how to route the buffer's
+#  interrupt to a physical interrupt pin.
 #------------------------------------------------------------------------
 #
 # Written by  SparkFun Electronics, November 2024
@@ -43,7 +44,7 @@ import sys
 
 def runExample():
 
-    print("\nSparkFun KX13X Accelerometer Example 4: Tap\n")
+    print("\nSparkFun KX13X Accelerometer Example 3\n")
     # myKx = qwiic_kx13x.QwiicKX134() # If using the KX134 un-comment this line and replace other instances of "kx132" with "kx134"
     myKx = qwiic_kx13x.QwiicKX132()
 
@@ -65,24 +66,41 @@ def runExample():
     # However there are many that can be changed "on-the-fly"
     # check datasheet for more info
     myKx.enable_accel(False)
-    # myKx.set_range(myKx.KX134_RANGE16G)  # If using the KX134 un-comment this line and comment out below line
-    myKx.set_range(myKx.KX132_RANGE16G)
-    myKx.enable_tap_engine()
+    
+    myKx.enable_buffer_and_interrupt()
+    myKx.enable_phys_interrupt()
+    myKx.route_hardware_interrupt(0x40)
+
+    myKx.set_buffer_operation_and_resolution(0x00)
+    
+    # myKx.set_range(myKx.KX134_RANGE8G)  # If using the KX134 un-comment this line and comment out below line
+    myKx.set_range(myKx.KX132_RANGE2G)
     myKx.enable_accel()
 
     while True:
-        if myKx.tap_detected():    
-            print("Tap Detected: ", hex(myKx.get_direction()))
-            myKx.clear_interrupt()
-        
-        if myKx.unknown_tap() or myKx.double_tap_detected():
-            myKx.clear_interrupt()
+        if myKx.get_sample_level() > 0:
 
-        time.sleep(.025) # Delay should be 1/ODR (Output Data Rate), default tap ODR is 400Hz
+            # We can read the data more quickly by calling getRawAccelBufferData because we know
+            # the buffer is being used and what the data resolution is.
+            # The default buffer resolution is 8-bit. It will be 16-bit because we called setBufferResolution above.
+            # If you comment setBufferResolution, change the '1' to a '0' for 8-bit data.
+
+            if myKx.get_raw_accel_buffer_data(1): # Change the '1' to a '0' for 8-bit data.
+                myKx.conv_accel_data()
+                # If using the KX134 un-comment the print below and comment out the print below that
+                # print("\nX: {0} Y: {1} Z: {2}".format(myKx.kx134_accel.x,
+                #                         myKx.kx134_accel.y,
+                #                         myKx.kx134_accel.z))
+                print("\nX: {0} Y: {1} Z: {2}".format(myKx.kx132_accel.x,
+                                                    myKx.kx132_accel.y,
+                                                    myKx.kx132_accel.z))
+        else:
+            print(".",end="")
+            time.sleep(.001) # wait 1 ms between checks
 
 if __name__ == '__main__':
 	try:
 		runExample()
 	except (KeyboardInterrupt, SystemExit) as exErr:
-		print("\nEnding Example 4")
+		print("\nEnding Example 3")
 		sys.exit(0)
