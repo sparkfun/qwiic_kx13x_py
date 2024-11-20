@@ -347,6 +347,12 @@ class QwiicKX13XCore(object):
         reg_val |= (enable << 7)
         self._i2c.writeByte(self.address, self.KX13X_CNTL1 , reg_val)
 
+    def accel_control(self, enable=True):
+        """
+        Same as above enable_accel(), but with a different name to preserve backwards compatibility
+        """
+        self.enable_accel(enable)
+
     def get_accel_state(self):
         """
             Retrieves the state of the accelerometer: on or off.
@@ -541,6 +547,12 @@ class QwiicKX13XCore(object):
             return True
         else:
             return False
+    
+    def data_trigger(self):
+        """
+        Same as above data_ready(), but with a different name to preserve backwards compatibility
+        """
+        return self.data_ready()
 
     def set_buffer_threshold(self, threshold):
         """
@@ -585,6 +597,12 @@ class QwiicKX13XCore(object):
         reg_val &= 0xBC
         reg_val |= combined_arguments
         self._i2c.writeByte(self.address, self.KX13X_BUF_CNTL2 , reg_val)
+    
+    def set_buffer_operation(self, operation_mode, resolution):
+        """
+        Same as above set_buffer_operation_and_resolution(), but with a different name to preserve backwards compatibility
+        """
+        self.set_buffer_operation_and_resolution(operation_mode, resolution)
 
     def enable_buffer_and_interrupt(self, enable = True, enable_interrupt = True):
         """
