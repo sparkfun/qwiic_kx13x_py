@@ -44,7 +44,7 @@
 # pylint: disable=line-too-long, bad-whitespace, invalid-name, too-many-public-methods
 #
 
-"""
+"""!
 qwiic_kx13x
 ============
 Python module for the qwiic kx132/4 accelerometers.
@@ -86,14 +86,15 @@ class AccelerationData(object):
         self.z = z
 
 class QwiicKX13XCore(object):
-    """
+    """!
     QwiicKX13XCore
-        :param address: The I2C address to use for the device.
+
+    @param address: The I2C address to use for the device.
                         If not provided, the default address is used.
-        :param i2c_driver: An existing i2c driver object. If not provided
+    @param i2c_driver: An existing i2c driver object. If not provided
                         a driver object is created.
-        :return: The KX13X device object.
-        :rtype: Object
+
+    @return **Object** The KX13X device object.
     """
     # Constructor
     device_name         = _DEFAULT_NAME
@@ -259,10 +260,10 @@ class QwiicKX13XCore(object):
     # Is an actual board connected to our system?
 
     def is_connected(self):
-        """
-            Determine if a KX13X device is conntected to the system..
-            :return: True if the device is connected, otherwise False.
-            :rtype: bool
+        """!
+        Determine if a KX13X device is conntected to the system..
+
+        @return **bool** True if the device is connected, otherwise False.
         """
         return qwiic_i2c.isDeviceConnected(self.address)
 
@@ -273,10 +274,10 @@ class QwiicKX13XCore(object):
     #
     # Initialize the system/validate the board.
     def beginCore(self):
-        """
-            Initialize the operation of the KX13X module
-            :return: Returns true of the initializtion was successful, otherwise False.
-            :rtype: bool
+        """!
+        Initialize the operation of the KX13X module
+
+        @return **bool** Returns true of the initializtion was successful, otherwise False.
         """
         # are we who we need to be?
         chipID = self._i2c.readByte(self.address, self.KX13X_WHO_AM_I)
@@ -286,15 +287,16 @@ class QwiicKX13XCore(object):
         return chipID
 
     def initialize(self, settings = DEFAULT_SETTINGS):
-        """
-            Initialize configures the accelerometer's registers into a number of
+        """!
+        Initialize configures the accelerometer's registers into a number of
             different modes: asyncronous, hardware trigger, software trigger,
             and buffer.
-            :param settings: A class constant indicating which setting to
+
+        @param settings: A class constant indicating which setting to
                 configure: DEFAULT_SETTINGS, INT_SETTINGS, SOFT_INT_SETTINGS,
                 BUFFER_SETTINGS.
-            :return: No return value.
 
+        @return No return value.
         """
         self.enable_accel(False)
 
@@ -314,10 +316,10 @@ class QwiicKX13XCore(object):
         # Space fore more default settings
 
     def run_command_test(self):
-        """
-            This function runs the self test built into the accelerometer.
-            :return: Returns true upon successful test, and false otherwise.
-            :rtype: bool
+        """!
+        This function runs the self test built into the accelerometer.
+
+        @return **bool** Returns true upon successful test, and false otherwise.
         """
         reg_val = self._i2c.readByte(self.address, self.KX13X_CNTL2)
         reg_val &= 0xBF
@@ -332,12 +334,13 @@ class QwiicKX13XCore(object):
 
 
     def enable_accel(self, enable=True):
-        """
-            This functions controls the accelerometers power on and off state.
-            :param enable: True or false indicating power on or off
+        """!
+        This functions controls the accelerometers power on and off state.
+
+        @param enable: True or false indicating power on or off
             respectively.
-            :return: Returns false when an incorrect argumen has been passed.
-            :rtype: bool
+
+        @return **bool** Returns false when an incorrect argumen has been passed.
         """
         if enable != True and enable != False:
             return False
@@ -348,25 +351,26 @@ class QwiicKX13XCore(object):
         self._i2c.writeByte(self.address, self.KX13X_CNTL1 , reg_val)
 
     def accel_control(self, enable=True):
-        """
+        """!
         Same as above enable_accel(), but with a different name to preserve backwards compatibility
         """
         self.enable_accel(enable)
 
     def get_accel_state(self):
-        """
-            Retrieves the state of the accelerometer: on or off.
-            :return: Returns bit indicating the accelerometers power state.
-            :rtype: int
+        """!
+        Retrieves the state of the accelerometer: on or off.
+
+        @return **int** Returns bit indicating the accelerometers power state.
         """
         reg_val = self._i2c.readByte(self.address, self.KX13X_CNTL1)
         return (reg_val & 0x80) >> 7
 
     def set_range(self, kx13x_range):
-        """
-            Sets the range reported by the accelerometer. For the KX132, the
+        """!
+        Sets the range reported by the accelerometer. For the KX132, the
             range is from 2G - 16G and for the KX134 it's 8G - 32G.
-            :param kx13x_range: Eight constants (four per version) represent values from zero to
+
+        @param kx13x_range: Eight constants (four per version) represent values from zero to
             four indicating the range to be set:
                 KX132_RANGE2G,
                 KX132_RANGE4G,
@@ -376,9 +380,8 @@ class QwiicKX13XCore(object):
                 KX134_RANGE16G,
                 KX134_RANGE32G,
                 KX134_RANGE64G.
-            :return: Returns false if an incorrect argument is given.
-            :rtype: bool
 
+        @return **bool** Returns false if an incorrect argument is given.
         """
 
         if kx13x_range < 0 or kx13x_range > 3:
@@ -391,13 +394,13 @@ class QwiicKX13XCore(object):
 
 
     def set_output_data_rate(self, rate):
-        """
-            Sets the rate at which the accelerometer outputs data.
-            :param rate: A value from zero to fifteen indicating which rate to
-            set.
-            :return: Returns false if an an incorrect argument is given.
-            :rtype: bool
+        """!
+        Sets the rate at which the accelerometer outputs data.
 
+        @param rate: A value from zero to fifteen indicating which rate to
+            set.
+
+        @return **bool** Returns false if an an incorrect argument is given.
         """
         if rate < 0 or rate > 15:
             return False
@@ -413,11 +416,10 @@ class QwiicKX13XCore(object):
 
 
     def get_output_data_rate(self):
-        """
-            Gets the accelerometers output data rate.
-            :return: Accelerometer's data rate in hertz.
-            :rtype: float
+        """!
+        Gets the accelerometers output data rate.
 
+        @return **float** Accelerometer's data rate in hertz.
         """
 
         reg_val = self._i2c.readByte(self.address, self.KX13X_ODCNTL)
@@ -428,18 +430,18 @@ class QwiicKX13XCore(object):
 
     def set_interrupt_pin(self, enable, polarity = 0, pulse_width = 0,
                           latch_control = False):
-        """
-            Sets all of whether the data ready bit is reported to the hardware
+        """!
+        Sets all of whether the data ready bit is reported to the hardware
             interrupt pin, the polarity of the signal (HIGH or LOW), the width
             of the pulse, and how the interrupt is cleared.
-            :param enable: Sets hardware interrupt to "on" or "off".
-            :param polarity: Sets the active state of the hardware pin - HIGH
-            or LOW.
-            :param pulse_width: Sets the width of the interrupt pulse.
-            :param latch_control: Sets how the interrupt pin is cleared.
-            :return: Returns false if an an incorrect argument is given.
-            :rtype: bool
 
+        @param enable: Sets hardware interrupt to "on" or "off".
+        @param polarity: Sets the active state of the hardware pin - HIGH
+            or LOW.
+        @param pulse_width: Sets the width of the interrupt pulse.
+        @param latch_control: Sets how the interrupt pin is cleared.
+
+        @return **bool** Returns false if an an incorrect argument is given.
         """
         if enable != True and enable != False:
             return False
@@ -461,16 +463,16 @@ class QwiicKX13XCore(object):
         self._i2c.writeByte(self.address, self.KX13X_INC1 , reg_val)
 
     def route_hardware_interrupt(self, rdr, pin = 1):
-        """
-            Determines which interrupt is reported: freefall, buffer full,
+        """!
+        Determines which interrupt is reported: freefall, buffer full,
             watermark, data ready, back to sleep, tap/double tap, wakeup or
             tilt. Also which hardware pin its reported on: one or two.
-            :param rdr: The interrupt to be reported.
-            :param pin: The hardware pin on which the interrupt is reported.
-            :return: Returns true after configuring the register and false if an an
-            incorrect argument is given.
-            :rtype: bool
 
+        @param rdr: The interrupt to be reported.
+        @param pin: The hardware pin on which the interrupt is reported.
+
+        @return **bool** Returns true after configuring the register and false if an an
+            incorrect argument is given.
         """
         if rdr < 0 or rdr > 128:
             return False
@@ -490,14 +492,14 @@ class QwiicKX13XCore(object):
             return True
     
     def enable_phys_interrupt(self, enable = True, pin = 1):
-        """
-            Enables interrupts to be routed to the interrupt pins.
+        """!
+        Enables interrupts to be routed to the interrupt pins.
 
-            :param enable: Whether to enable or disable the physical interrupt pin
-            :param pin: The interrupt pin to enable or disable
-            :return: Returns true after configuring the register and false if an an
+        @param enable: Whether to enable or disable the physical interrupt pin
+        @param pin: The interrupt pin to enable or disable
+
+        @return **bool** Returns true after configuring the register and false if an an
             incorrect argument is given.
-            :rtype: bool
         """
         if pin > 2 or pin <= 0:
             return False
@@ -527,20 +529,19 @@ class QwiicKX13XCore(object):
 
 
     def clear_interrupt(self):
-        """
-            Clears the interrupt.
-            :return: No return value.
+        """!
+        Clears the interrupt.
 
+        @return No return value.
         """
         self._i2c.readByte(self.address, self.KX13X_INT_REL)
 
     def data_ready(self):
-        """
-            Reads the register indicating whether data is ready to be read.
-            :return: Returns true if data is ready to be read and false
-            otherwise.
-            :rtype: bool
+        """!
+        Reads the register indicating whether data is ready to be read.
 
+        @return **bool** Returns true if data is ready to be read and false
+            otherwise.
         """
         reg_val = self._i2c.readByte(self.address, self.KX13X_INS2)
         if reg_val & 0x10:
@@ -549,17 +550,18 @@ class QwiicKX13XCore(object):
             return False
     
     def data_trigger(self):
-        """
+        """!
         Same as above data_ready(), but with a different name to preserve backwards compatibility
         """
         return self.data_ready()
 
     def set_buffer_threshold(self, threshold):
-        """
-            Sets how many samples are stored in the buffer.
-            :param threshold: The number of samples to be stored.
-            :return: Returns false if an incorrect argument is given.
-            :rtype: bool
+        """!
+        Sets how many samples are stored in the buffer.
+
+        @param threshold: The number of samples to be stored.
+
+        @return **bool** Returns false if an incorrect argument is given.
         """
         if threshold < 2 or threshold > 171:
             return False
@@ -574,15 +576,16 @@ class QwiicKX13XCore(object):
         self._i2c.writeByte(self.address, self.KX13X_BUF_CNTL1, threshold)
 
     def set_buffer_operation_and_resolution(self, operation_mode, resolution=True):
-        """
-            Sets the mode and resolution of the samples stored in the buffer.
-            :param operation_mode: Sets the mode:
+        """!
+        Sets the mode and resolution of the samples stored in the buffer.
+
+        @param operation_mode: Sets the mode:
                                    BUFFER_MODE_FIFO
                                    BUFFER_MODE_STREAM
                                    BUFFER_MODE_TRIGGER
-            :param resolution: Sets the resolution of the samples, 8 or 16 bit. (True = 16 bit, False = 8 bit)
-            :return: Returns false if an incorrect argument is given.
-            :rtype: bool
+        @param resolution: Sets the resolution of the samples, 8 or 16 bit. (True = 16 bit, False = 8 bit)
+
+        @return **bool** Returns false if an incorrect argument is given.
 
             NOTE: This combines the functionality of the setBufferResolution and setBufferOperationMode methods from the arduino library
         """
@@ -599,19 +602,20 @@ class QwiicKX13XCore(object):
         self._i2c.writeByte(self.address, self.KX13X_BUF_CNTL2 , reg_val)
     
     def set_buffer_operation(self, operation_mode, resolution):
-        """
+        """!
         Same as above set_buffer_operation_and_resolution(), but with a different name to preserve backwards compatibility
         """
         self.set_buffer_operation_and_resolution(operation_mode, resolution)
 
     def enable_buffer_and_interrupt(self, enable = True, enable_interrupt = True):
-        """
-            Enables the buffer and whether the buffer triggers an interrupt
+        """!
+        Enables the buffer and whether the buffer triggers an interrupt
             when full.
-            :param enable: Enables the buffer.
-            :param enable: Enables the buffer's interrupt.
-            :return: Returns false if an incorrect argument is given.
-            :rtype: bool
+
+        @param enable: Enables the buffer.
+        @param enable: Enables the buffer's interrupt.
+
+        @return **bool** Returns false if an incorrect argument is given.
 
             NOTE: This combines the functionality of the enableSampleBuffer and enableBufferInt methods from the arduino library
         """
@@ -628,8 +632,8 @@ class QwiicKX13XCore(object):
         self._i2c.writeByte(self.address, self.KX13X_BUF_CNTL2 , reg_val)
 
     def get_raw_accel_data(self):
-        """
-            Retrieves the raw register values representing accelerometer data.
+        """!
+        Retrieves the raw register values representing accelerometer data.
 
             Note: this method does not check if the registers contain valid data.
             The user needs to do that externally by calling dataReady
@@ -655,8 +659,8 @@ class QwiicKX13XCore(object):
         self.raw_output_data.z = uz
 
     def get_raw_accel_buffer_data(self, sixteenBit = -1):
-        """
-            Retrieves the raw buffer values representing accelerometer data.
+        """!
+        Retrieves the raw buffer values representing accelerometer data.
 
             If sixteenBit is -1 (the default), the code reads the Buffer Control Register 2 bres
             bit to determine if the buffer data is 8-bit or 16-bit. You can speed up the code
@@ -666,8 +670,7 @@ class QwiicKX13XCore(object):
             The user needs to do that externally by calling getSampleLevel
             or using the INT pins to indicate that data is ready.
 
-            :return: Returns false if an incorrect argument is given.
-            :rtype: bool
+        @return **bool** Returns false if an incorrect argument is given.
         """
         if sixteenBit > 1 or sixteenBit < -1:
             return False
@@ -714,8 +717,8 @@ class QwiicKX13XCore(object):
 
 
     def software_reset(self):
-        """
-            Resets the accelerometer
+        """!
+        Resets the accelerometer
 
             Kionix Technical Reference Manual says:
             "To change the value of the SRST bit, the PC1 bit in CNTL1 register must first be set to 0."
@@ -732,7 +735,7 @@ class QwiicKX13XCore(object):
             But, the _next_ I2C transaction _does_ get NACK'd...
             The solution seems to be to keep trying to read CNTL2 and wait for the SRST bit to be cleared.
 
-            :return: True if the reset was successful, False otherwise.
+        @return True if the reset was successful, False otherwise.
         """
         
         self.enable_accel(False)
@@ -754,10 +757,10 @@ class QwiicKX13XCore(object):
         return False
     
     def enable_data_engine(self, enable=True):
-        """
-            Enables the data ready bit.
+        """!
+        Enables the data ready bit.
 
-            :param enable: True to enable the data engine, False to disable it.
+        @param enable: True to enable the data engine, False to disable it.
         """
 
         kDataReadyBitMask = 0b1 << 5
@@ -770,10 +773,10 @@ class QwiicKX13XCore(object):
         self._i2c.writeByte(self.address, self.KX13X_CNTL1, reg_val)
     
     def enable_tap_engine(self,enable=True):
-        """
-            Enables the tap and double tap features of the accelerometers
+        """!
+        Enables the tap and double tap features of the accelerometers
 
-            :param enable: True to enable the tap engine, False to disable it.
+        @param enable: True to enable the tap engine, False to disable it.
         """
 
         kTapEngineBitMask = 0b1 << 2
@@ -786,10 +789,10 @@ class QwiicKX13XCore(object):
         self._i2c.writeByte(self.address, self.KX13X_CNTL1, reg_val)
     
     def enable_direct_tap_interrupt(self, enable=True):
-        """
-            Enables reporting on the direction of the latest generated tap.
+        """!
+        Enables reporting on the direction of the latest generated tap.
 
-            :param enable: True to enable the direct tap interrupt, False to disable it.
+        @param enable: True to enable the direct tap interrupt, False to disable it.
         """
 
         kDirectTapInterruptBitMask = 0b1 << 0
@@ -803,11 +806,11 @@ class QwiicKX13XCore(object):
 
 
     def tap_detected(self):
-        """
-            Checks the tap interrupt bit indicating that a tap has
+        """!
+        Checks the tap interrupt bit indicating that a tap has
             been detected.
 
-            :return: True if a tap has been detected, False otherwise.
+        @return True if a tap has been detected, False otherwise.
         """
 
         kTapDetectedShift = 2
@@ -820,16 +823,16 @@ class QwiicKX13XCore(object):
         return tap_result == kSingleTapStatusResult
 
     def get_direction(self):
-        """
-            If the tap direction bit is enabled, this register will report
+        """!
+        If the tap direction bit is enabled, this register will report
             the direction of the detected tap.
         """
 
         return self._i2c.readByte(self.address, self.KX13X_INS1)
     
     def unknown_tap(self):
-        """
-            if the accelerometer is unsure whether it has in fact
+        """!
+        if the accelerometer is unsure whether it has in fact
             detected a tap, it will report an "unknown" state. in that
             case this function will return true. good for error checking.
         """
@@ -844,8 +847,8 @@ class QwiicKX13XCore(object):
         return tap_result == kUnknownTapStatusResult
     
     def double_tap_detected(self):
-        """
-            Checks the double tap interrupt bit indicating that
+        """!
+        Checks the double tap interrupt bit indicating that
             a double tap has been detected.
         """
 
@@ -859,10 +862,10 @@ class QwiicKX13XCore(object):
         return tap_result == kDoubleTapStatusResult
 
     def get_sample_level(self):
-        """
-            Gets the number of samples in the Buffer.
+        """!
+        Gets the number of samples in the Buffer.
 
-           :return: Returns integer number of samples in the buffer
+        @return Returns integer number of samples in the buffer
         """
 
         reg_val = self._i2c.read_block(self.address, self.KX13X_BUF_STATUS_1, 2)
@@ -887,12 +890,12 @@ class QwiicKX132(QwiicKX13XCore):
         self.kx132_accel = AccelerationData(0,0,0)
 
     def begin(self):
-        """
-            Checks that communication can be made with the QwiicKX132 by checking
+        """!
+        Checks that communication can be made with the QwiicKX132 by checking
             the WHO_AM_I register.
-            :return: Returns true if WHO_AM_I value is the correct one and
+
+        @return **bool** Returns true if WHO_AM_I value is the correct one and
             false otherwise.
-            :rtype: bool
         """
         chipID = self.beginCore()
         if chipID == self.KX132_WHO_AM_I:
@@ -901,15 +904,15 @@ class QwiicKX132(QwiicKX13XCore):
             return False
 
     def get_accel_data(self):
-        """
-            Retrieves acceleration data and converts it, and stores it
+        """!
+        Retrieves acceleration data and converts it, and stores it
         """
         self.get_raw_accel_data()
         self.conv_accel_data()
 
 def conv_accel_data(self):
-        """
-            Converts raw acceleration data according to the range setting and
+        """!
+        Converts raw acceleration data according to the range setting and
             stores it
         """
         accel_range = self._i2c.readByte(self.address, self.KX13X_CNTL1)
@@ -952,12 +955,12 @@ class QwiicKX134(QwiicKX13XCore):
         self.kx134_accel = AccelerationData(0,0,0)
 
     def begin(self):
-        """
-            Checks that communication can be made with the QwiicKX134 by checking
+        """!
+        Checks that communication can be made with the QwiicKX134 by checking
             the WHO_AM_I register.
-            :return: Returns true if WHO_AM_I value is the correct one and
+
+        @return **bool** Returns true if WHO_AM_I value is the correct one and
             false otherwise.
-            :rtype: bool
         """
         chipID = self.beginCore()
         if chipID == self.KX134_WHO_AM_I:
@@ -966,15 +969,15 @@ class QwiicKX134(QwiicKX13XCore):
             return False
 
     def get_accel_data(self):
-        """
-            Retrieves acceleration data and converts it, and stores it
+        """!
+        Retrieves acceleration data and converts it, and stores it
         """
         self.get_raw_accel_data()
         self.conv_accel_data()
 
     def conv_accel_data(self):
-        """
-            Converts raw acceleration data according to the range setting and
+        """!
+        Converts raw acceleration data according to the range setting and
             stores it
         """
         accel_range = self._i2c.readByte(self.address, self.KX13X_CNTL1)
