@@ -1,91 +1,118 @@
-Qwiic_KX13X_Py
-==================
+![Qwiic KX13X - Python Package](docs/images/gh-banner.png "qwiic KX13X Python Package")
 
-<p align="center">
-   <img src="https://cdn.sparkfun.com/assets/custom_pages/2/7/2/qwiic-logo-registered.jpg"  width=200>  
-   <img src="https://www.python.org/static/community_logos/python-logo-master-v3-TM.png"  width=240>   
-</p>
-<p align="center">
-	<a href="https://pypi.org/project/sparkfun-qwiic-kx13x/" alt="Package">
-		<img src="https://img.shields.io/pypi/pyversions/sparkfun_qwiic_kx13x.svg" /></a>
-	<a href="https://github.com/sparkfun/Qwiic_KX13X_Py/issues" alt="Issues">
-		<img src="https://img.shields.io/github/issues/sparkfun/Qwiic_KX13X_Py.svg" /></a>
-	<a href="https://qwiic-kx13x-py.readthedocs.io/en/latest/?" alt="Documentation">
-		<img src="https://readthedocs.org/projects/qwiic-kx13x-py/badge/?version=latest&style=flat" /></a>
-	<a href="https://github.com/sparkfun/Qwiic_KX13X_Py/blob/master/LICENSE" alt="License">
-		<img src="https://img.shields.io/badge/license-MIT-blue.svg" /></a>
-	<a href="https://twitter.com/intent/follow?screen_name=sparkfun">
-        	<img src="https://img.shields.io/twitter/follow/sparkfun.svg?style=social&logo=twitter"
-           	 alt="follow on Twitter"></a>
-	
-</p>
+# SparkFun Qwiic KX13X - Python Package
 
-Python module for the [SparkFun Qwiic KX132
-Accerlerometer](https://www.sparkfun.com/products/17871) and the [SparkFun
-Qwiic KX134 Accelerometer](https://www.sparkfun.com/products/17589).
+![PyPi Version](https://img.shields.io/pypi/v/sparkfun_qwiic_kx13x)
+![GitHub issues](https://img.shields.io/github/issues/sparkfun/qwiic_kx13x_py)
+![License](https://img.shields.io/github/license/sparkfun/qwiic_kx13x_py)
+![X](https://img.shields.io/twitter/follow/sparkfun)
+[![API](https://img.shields.io/badge/API%20Reference-blue)](https://docs.sparkfun.com/qwiic_kx13x_py/namespaceqwiic__kx13x.html)
 
-This python package is a port of the existing [SparkFun KX13X Arduino Library](https://github.com/sparkfun/SparkFun_ADXL313_Arduino_Library)
+The SparkFun Qwiic Accelerometer KX13X Module provides a simple and cost effective solution for adding Accelerometer capabilities to your project. Implementing a SparkFun Qwiic I2C interface, these sensors can be rapidly added to any project with boards that are part of the SparkFun Qwiic ecosystem.
 
-This package can be used in conjunction with the overall [SparkFun qwiic Python Package](https://github.com/sparkfun/Qwiic_Py)
+This repository implements a Python package for the SparkFun Qwiic KX13X. This package works with Python, MicroPython and CircuitPython.
+
+### Contents
+
+* [About](#about-the-package)
+* [Getting Started](#getting-started)
+* [Installation](#installation)
+* [Supported Platforms](#supported-platforms)
+* [Documentation](https://docs.sparkfun.com/qwiic_kx13x_py/namespaceqwiic__kx13x.html)
+* [Examples](#examples)
+
+## About the Package
+
+This python package enables the user to access the features of the KX13X via a single Qwiic cable. This includes <reading 3-axis acceleration, managing interrupts> and more. The capabilities of the KX13X are each demonstrated in the included examples.
 
 New to qwiic? Take a look at the entire [SparkFun qwiic ecosystem](https://www.sparkfun.com/qwiic).
 
-## Contents
+### Supported SparkFun Products
 
-* [Dependencies](#dependencies)
-* [Installation](#installation)
-* [Documentation](#documentation)
-* [Example Use](#example-use)
+This Python package supports the following SparkFun qwiic products on Python, MicroPython and Circuit python. 
 
-Dependencies 
----------------
-This driver package depends on the qwiic I2C driver: 
-[Qwiic_I2C_Py](https://github.com/sparkfun/Qwiic_I2C_Py)
+* [SparkFun Accelerometer Sensor - KX13X](https://www.sparkfun.com/products/17589)
 
-Documentation
--------------
-The SparkFun Qwiic KX13X module documentation is hosted at [ReadTheDocs](https://qwiic-kx13x-py.readthedocs.io/en/latest/?)
+### Supported Platforms
 
-Installation
--------------
+| Python | Platform | Boards |
+|--|--|--|
+| Python | Linux | [Raspberry Pi](https://www.sparkfun.com/raspberry-pi-5-8gb.html) , [NVIDIA Jetson Orin Nano](https://www.sparkfun.com/nvidia-jetson-orin-nano-developer-kit.html) via the [SparkFun Qwiic SHIM](https://www.sparkfun.com/sparkfun-qwiic-shim-for-raspberry-pi.html) |
+| MicroPython | Raspberry Pi - RP2, ESP32 | [SparkFun RP2040 Thing+](https://www.sparkfun.com/sparkfun-thing-plus-rp2040.html), [SparkFun RP2350 Thing+](https://www.sparkfun.com/sparkfun-thing-plus-rp2350.html), [SparkFun ESP32 Thing+](https://www.sparkfun.com/sparkfun-thing-plus-esp32-wroom-usb-c.html)
+|CircuitPython | Raspberry Pi - RP2, ESP32 | [SparkFun RP2040 Thing+](https://www.sparkfun.com/sparkfun-thing-plus-rp2040.html), [SparkFun RP2350 Thing+](https://www.sparkfun.com/sparkfun-thing-plus-rp2350.html), [SparkFun ESP32 Thing+](https://www.sparkfun.com/sparkfun-thing-plus-esp32-wroom-usb-c.html)
 
-### PyPi Installation
-This repository is hosted on PyPi as the [sparkfun-qwiic-kx13x](https://pypi.org/project/sparkfun-qwiic-kx13x/) package. On systems that support PyPi installation via pip, this library is installed using the following commands
+> [!NOTE]
+> The listed supported platforms and boards are the primary platform targets tested. It is fully expected that this package will work across a wide variety of Python enabled systems. 
 
-For all users (note: the user must have sudo privileges):
+## Installation 
+
+The first step to using this package is installing it on your system. The install method depends on the python platform. The following sections outline installation on Python, MicroPython and CircuitPython.
+
+### Python 
+
+#### PyPi Installation
+
+The package is primarily installed using the `pip3` command, downloading the package from the Python Index - "PyPi". 
+
+Note - the below instructions outline installation on a Linux-based (Raspberry Pi) system.
+
+First, setup a virtual environment from a specific directory using venv:
 ```sh
-sudo pip install sparkfun-qwiic-kx13x
+python3 -m venv path/to/venv
 ```
-For the current user:
+You can pass any path as path/to/venv, just make sure you use the same one for all future steps. For more information on venv [click here](https://docs.python.org/3/library/venv.html).
 
+Next, install the qwiic package with:
 ```sh
-pip install sparkfun-qwiic-kx13x
+path/to/venv/bin/pip3 install sparkfun-qwiic-kx13x
+```
+Now you should be able to run any example or custom python scripts that have `import qwiic_kx13x` by running e.g.:
+```sh
+path/to/venv/bin/python3 example_script.py
 ```
 
-### Local Installation
-To install, make sure the setuptools package is installed on the system.
+### MicroPython Installation
+If not already installed, follow the [instructions here](https://docs.micropython.org/en/latest/reference/mpremote.html) to install mpremote on your computer.
 
-Direct installation at the command line:
+Connect a device with MicroPython installed to your computer and then install the package directly to your device with mpremote mip.
 ```sh
-python setup.py install
+mpremote mip install github:sparkfun/qwiic_kx13x_py
 ```
 
-To build a package for use with pip:
+If you would also like to install the examples for this repository, issue the following mip command as well:
 ```sh
-python setup.py sdist
- ```
-A package file is built and placed in a subdirectory called dist. This package file can be installed using pip.
-```sh
-cd dist
-pip install sparkfun_qwiic_kx13x-<version>.tar.gz
-  
+mprmeote mip install github:sparkfun/qwiic_kx13x_py@examples
 ```
+
+### CircuitPython Installation
+If not already installed, follow the [instructions here](https://docs.circuitpython.org/projects/circup/en/latest/#installation) to install CircUp on your computer.
+
+Ensure that you have the latest version of the SparkFun Qwiic CircuitPython bundle. 
+```sh
+circup bundle-add sparkfun/Qwiic_Py
+```
+
+Finally, connect a device with CircuitPython installed to your computer and then install the package directly to your device with circup.
+```sh
+circup install --py qwiic_kx13x
+```
+
+If you would like to install any of the examples from this repository, issue the corresponding circup command from below. (NOTE: The below syntax assumes you are using CircUp on Windows. Linux and Mac will have different path seperators (i.e. "/" vs. "\"). See the [CircUp "example" command documentation](https://learn.adafruit.com/keep-your-circuitpython-libraries-on-devices-up-to-date-with-circup/example-command) for more information)
+
+```sh
+circup example qwiic_kx13x\qwiic_kx13x_ex1
+circup example qwiic_kx13x\qwiic_kx13x_ex3
+circup example qwiic_kx13x\qwiic_kx13x_ex4
+```
+
 Example Use
  ---------------
-See the examples directory for more detailed use examples.
+Below is a quickstart program to print readings from the KX13X.
+
+See the examples directory for more detailed use examples and [examples/README.md](https://github.com/sparkfun/qwiic_kx13x_py/blob/main/examples/README.md) for a summary of the available examples.
 
 ```python
-from __future__ import print_function
+
 import qwiic_kx13x
 import time
 import sys
@@ -93,7 +120,6 @@ import sys
 def runExample():
 
     print("\nSparkFun KX13X Accelerometer Example 1\n")
-    # myKx = qwiic_kx13x.QwiicKX134() # If using the KX134 un-comment this line and replace other instances of "kx132" with "kx134"
     myKx = qwiic_kx13x.QwiicKX132()
 
     if myKx.connected == False:
@@ -106,17 +132,21 @@ def runExample():
     else:
         print("Make sure you're using the KX132 and not the KX134")
 
-    # myKx.set_range(myKx.KX132_RANGE8G) # Update the range of the data output.
-    myKx.initialize(myKx.BASIC_SETTINGS) # Load basic settings 
+    if (myKx.software_reset()):
+        print("Reset")
+
+    myKx.enable_accel(False)
+    myKx.set_range(myKx.KX132_RANGE16G)
+    myKx.enable_data_engine()
+    myKx.enable_accel()
 
     while True:
-            
-        myKx.get_accel_data()
-        print("X: {0}g Y: {1}g Z: {2}g".format(myKx.kx132_accel.x,
-                                               myKx.kx132_accel.y,
-                                               myKx.kx132_accel.z))
-        time.sleep(.02) #Set delay to 1/Output Data Rate which is by default 50Hz 1/50 = .02
-
+        if myKx.data_ready():    
+            myKx.get_accel_data()
+            print("X: {0} Y: {1} Z: {2}".format(myKx.kx132_accel.x,
+                                                myKx.kx132_accel.y,
+                                                myKx.kx132_accel.z))
+            time.sleep(.02) #Set delay to 1/Output Data Rate which is by default 50Hz 1/50 = .02
 
 if __name__ == '__main__':
 	try:
@@ -127,6 +157,5 @@ if __name__ == '__main__':
 
 ```
 <p align="center">
-<a href="https://www.sparkfun.com" alt="SparkFun">
-<img src="https://cdn.sparkfun.com/assets/custom_pages/3/3/4/dark-logo-red-flame.png" alt="SparkFun - Start Something"></a>
+<img src="https://cdn.sparkfun.com/assets/custom_pages/3/3/4/dark-logo-red-flame.png" alt="SparkFun - Start Something">
 </p>
