@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - refactor/match_arduino
   workflow_dispatch:
 
 permissions:
