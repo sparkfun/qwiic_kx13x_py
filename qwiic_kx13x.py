@@ -910,31 +910,31 @@ class QwiicKX132(QwiicKX13XCore):
         self.get_raw_accel_data()
         self.conv_accel_data()
 
-def conv_accel_data(self):
-        """!
-        Converts raw acceleration data according to the range setting and
-            stores it
-        """
-        accel_range = self._i2c.readByte(self.address, self.KX13X_CNTL1)
-        accel_range &= 0x18
-        accel_range = accel_range >> 3
+    def conv_accel_data(self):
+            """!
+            Converts raw acceleration data according to the range setting and
+                stores it
+            """
+            accel_range = self._i2c.readByte(self.address, self.KX13X_CNTL1)
+            accel_range &= 0x18
+            accel_range = accel_range >> 3
 
-        if accel_range == self.KX132_RANGE2G:
-            self.kx132_accel.x = round(self.raw_output_data.x * self.CONV_2G, 6)
-            self.kx132_accel.y = round(self.raw_output_data.y * self.CONV_2G, 6)
-            self.kx132_accel.z = round(self.raw_output_data.z * self.CONV_2G, 6)
-        elif accel_range == self.KX132_RANGE4G:
-            self.kx132_accel.x = round(self.raw_output_data.x * self.CONV_4G, 6)
-            self.kx132_accel.y = round(self.raw_output_data.y * self.CONV_4G, 6)
-            self.kx132_accel.z = round(self.raw_output_data.z * self.CONV_4G, 6)
-        elif accel_range == self.KX132_RANGE8G:
-            self.kx132_accel.x = round(self.raw_output_data.x * self.CONV_8G, 6)
-            self.kx132_accel.y = round(self.raw_output_data.y * self.CONV_8G, 6)
-            self.kx132_accel.z = round(self.raw_output_data.z * self.CONV_8G, 6)
-        elif accel_range == self.KX132_RANGE16G:
-            self.kx132_accel.x = round(self.raw_output_data.x * self.CONV_16G, 6)
-            self.kx132_accel.y = round(self.raw_output_data.y * self.CONV_16G, 6)
-            self.kx132_accel.z = round(self.raw_output_data.z * self.CONV_16G, 6)
+            if accel_range == self.KX132_RANGE2G:
+                self.kx132_accel.x = round(self.raw_output_data.x * self.CONV_2G, 6)
+                self.kx132_accel.y = round(self.raw_output_data.y * self.CONV_2G, 6)
+                self.kx132_accel.z = round(self.raw_output_data.z * self.CONV_2G, 6)
+            elif accel_range == self.KX132_RANGE4G:
+                self.kx132_accel.x = round(self.raw_output_data.x * self.CONV_4G, 6)
+                self.kx132_accel.y = round(self.raw_output_data.y * self.CONV_4G, 6)
+                self.kx132_accel.z = round(self.raw_output_data.z * self.CONV_4G, 6)
+            elif accel_range == self.KX132_RANGE8G:
+                self.kx132_accel.x = round(self.raw_output_data.x * self.CONV_8G, 6)
+                self.kx132_accel.y = round(self.raw_output_data.y * self.CONV_8G, 6)
+                self.kx132_accel.z = round(self.raw_output_data.z * self.CONV_8G, 6)
+            elif accel_range == self.KX132_RANGE16G:
+                self.kx132_accel.x = round(self.raw_output_data.x * self.CONV_16G, 6)
+                self.kx132_accel.y = round(self.raw_output_data.y * self.CONV_16G, 6)
+                self.kx132_accel.z = round(self.raw_output_data.z * self.CONV_16G, 6)
 
 
 class QwiicKX134(QwiicKX13XCore):
