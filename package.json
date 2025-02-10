@@ -1,9 +1,8 @@
 {
     "urls": [
-      ["qwiic_kx13x.py", "github:sparkfun/Qwiic_KX13X_Py/qwiic_kx13x.py"]
-    ],
-    "deps": [
-      ["github:sparkfun/Qwiic_I2C_Py", "master"]
+      ["qwiic_kx13x_py_examples/qwiic_kx13x_ex1.py", "github:sparkfun/qwiic_kx13x_py/examples/qwiic_kx13x_ex1.py"],
+      ["qwiic_kx13x_py_examples/qwiic_kx13x_ex3.py", "github:sparkfun/qwiic_kx13x_py/examples/qwiic_kx13x_ex3.py"],
+      ["qwiic_kx13x_py_examples/qwiic_kx13x_ex4.py", "github:sparkfun/qwiic_kx13x_py/examples/qwiic_kx13x_ex4.py"]
     ],
     "version": "1.0.1"
 }
