@@ -46,4 +46,4 @@ keywords = ["electronics, maker"]
 homepage = "https://www.sparkfun.com/products/17589"
 
 [tool.setuptools]
-packages = ["qwiic_kx13x"]
+py-modules = ["qwiic_kx13x"]
