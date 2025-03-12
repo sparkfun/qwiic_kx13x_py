@@ -3,7 +3,7 @@ requires = ["setuptools"]
 
 [project]
 name = "sparkfun_qwiic_kx13x"
-version = "1.0.1"
+version = "2.0.0"
 description = "Sparkfun Electronics Qwiic KX13X Package"
 readme = "DESCRIPTION.rst"
 
